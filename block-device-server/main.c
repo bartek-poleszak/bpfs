@@ -3,8 +3,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef int fileDescriptor;
+#include <unistd.h>
+#include "blockDevice.h"
 
 ///
 /// \brief main
@@ -16,24 +16,13 @@ typedef int fileDescriptor;
 
 int main(int argc, char *argv[])
 {
-    fileDescriptor partition = openBlockDevice(argv[1]);
-    int blockSize = atoi(argv[2]);
-    close(partition);
-    return 0;
-}
-
-///
-/// \brief openBlockDevice
-/// \param path
-/// \return file descriptor if file is opened, terminates if error occured
-///
-
-fileDescriptor openBlockDevice(char *path) {
-    fileDescriptor result = open(path, O_RDWR);
-    if (result < 0) {
-        perror(NULL);
-        exit(0);
+    if (argc < 3) {
+        printf("Too few arguments!");
+        exit(1);
     }
-    return result;
+    int blockSize = atoi(argv[2]);
+    struct BlockDevice partition = openBlockDevice(argv[1]);
+    close(partition.descriptor);
+    return 0;
 }
 

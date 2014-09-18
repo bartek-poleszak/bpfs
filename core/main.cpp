@@ -1,4 +1,5 @@
 #include <iostream>
+#include "disk.h"
 
 using namespace std;
 
