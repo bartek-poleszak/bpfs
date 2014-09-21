@@ -1,15 +1,24 @@
 #include "blockDevice.h"
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
-void seekToBlock(struct BlockDevice *partition, int blockNumber)
+off_t seekToBlock(BlockDevice *partition, int blockNumber)
 {
     off_t desiredOffset = blockNumber * partition->blockSize;
     off_t offset = lseek(partition->descriptor, desiredOffset, SEEK_SET);
+
     if (offset < 0) {
-        perror(0);
+        perror("seekToBlock");
+        exit(1);
     }
+    if (desiredOffset != offset) {
+        printf("Desired offset is not reached!");
+    }
+    return offset;
 }
 
 ///
@@ -18,13 +27,13 @@ void seekToBlock(struct BlockDevice *partition, int blockNumber)
 /// \return file descriptor if file is opened, terminates if error occured
 ///
 
-struct BlockDevice openBlockDevice(char *path, int blockSize)
+BlockDevice openBlockDevice(char *path, int blockSize)
 {
-    struct BlockDevice result;
+    BlockDevice result;
     result.descriptor = open(path, O_RDWR | O_SYNC);
     result.blockSize = blockSize;
-    if (result < 0) {
-        perror(NULL);
+    if (result.descriptor < 0) {
+        perror("openBlockDevice");
         exit(1);
     }
     return result;
@@ -43,7 +52,15 @@ void writeBlock(BlockDevice partition, int blockNumber, char *buffer)
 }
 
 
-int blockCount(BlockDevice partition)
+unsigned blockCount(BlockDevice partition)
 {
+    char buffer[partition.blockSize];
+    seekToBlock(&partition, 0);
 
+    int result = 0;
+    int bytesRead;
+    while ((bytesRead = read(partition.descriptor, buffer, partition.blockSize)) == partition.blockSize) {
+        result++;
+    }
+    return result;
 }

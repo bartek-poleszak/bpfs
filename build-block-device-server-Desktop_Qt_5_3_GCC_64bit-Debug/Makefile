@@ -45,8 +45,10 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../block-device-server/main.c 
-OBJECTS       = main.o
+SOURCES       = ../block-device-server/main.c \
+		../block-device-server/blockDevice.c 
+OBJECTS       = main.o \
+		blockDevice.o
 DIST          = ../../.bin/Qt/5.3/gcc_64/mkspecs/features/spec_pre.prf \
 		../../.bin/Qt/5.3/gcc_64/mkspecs/common/shell-unix.conf \
 		../../.bin/Qt/5.3/gcc_64/mkspecs/common/unix.conf \
@@ -149,7 +151,8 @@ DIST          = ../../.bin/Qt/5.3/gcc_64/mkspecs/features/spec_pre.prf \
 		../../.bin/Qt/5.3/gcc_64/mkspecs/features/exceptions.prf \
 		../../.bin/Qt/5.3/gcc_64/mkspecs/features/yacc.prf \
 		../../.bin/Qt/5.3/gcc_64/mkspecs/features/lex.prf \
-		../block-device-server/block-device-server.pro ../block-device-server/main.c
+		../block-device-server/block-device-server.pro ../block-device-server/main.c \
+		../block-device-server/blockDevice.c
 QMAKE_TARGET  = block-device-server
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = block-device-server
@@ -423,8 +426,11 @@ compiler_clean:
 
 ####### Compile
 
-main.o: ../block-device-server/main.c 
+main.o: ../block-device-server/main.c ../block-device-server/blockDevice.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o main.o ../block-device-server/main.c
+
+blockDevice.o: ../block-device-server/blockDevice.c ../block-device-server/blockDevice.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o blockDevice.o ../block-device-server/blockDevice.c
 
 ####### Install
 
