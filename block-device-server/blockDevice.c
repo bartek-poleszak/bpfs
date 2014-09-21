@@ -36,30 +36,45 @@ BlockDevice openBlockDevice(char *path, int blockSize)
         perror("openBlockDevice");
         exit(1);
     }
+
     return result;
 }
 
-
-void readBlock(BlockDevice partition, int blockNumber, char *buffer)
+void closeBlockDevice(BlockDevice *partition)
 {
+    close(partition->descriptor);
+}
 
+void readBlock(BlockDevice *partition, int blockNumber, char *buffer)
+{
+    seekToBlock(partition, blockNumber);
+    int bytesRead = read(partition->descriptor, buffer, partition->blockSize);
+    if (bytesRead != partition->blockSize) {
+        perror("readBlock");
+        exit(1);
+    }
 }
 
 
-void writeBlock(BlockDevice partition, int blockNumber, char *buffer)
+void writeBlock(BlockDevice *partition, int blockNumber, char *buffer)
 {
-
+    seekToBlock(partition, blockNumber);
+    int bytesWritten = write(partition->descriptor, buffer, partition->blockSize);
+    if (bytesWritten  != partition->blockSize) {
+        perror("readBlock");
+        exit(1);
+    }
 }
 
 
-unsigned blockCount(BlockDevice partition)
+unsigned blockCount(BlockDevice *partition)
 {
-    char buffer[partition.blockSize];
-    seekToBlock(&partition, 0);
+    char buffer[partition->blockSize];
+    seekToBlock(partition, 0);
 
     int result = 0;
     int bytesRead;
-    while ((bytesRead = read(partition.descriptor, buffer, partition.blockSize)) == partition.blockSize) {
+    while ((bytesRead = read(partition->descriptor, buffer, partition->blockSize)) == partition->blockSize) {
         result++;
     }
     return result;

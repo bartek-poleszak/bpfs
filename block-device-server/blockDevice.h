@@ -8,8 +8,9 @@ typedef struct {
 } BlockDevice;
 
 BlockDevice openBlockDevice(char *path, int blockSIze);
-void readBlock(BlockDevice partition, int blockNumber, char *buffer);
-void writeBlock(BlockDevice partition, int blockNumber, char *buffer);
-unsigned blockCount(BlockDevice partition);
+void closeBlockDevice(BlockDevice *partition);
+void readBlock(BlockDevice *partition, int blockNumber, char *buffer);
+void writeBlock(BlockDevice *partition, int blockNumber, char *buffer);
+unsigned blockCount(BlockDevice *partition);
 
 #endif // BLOCKDEVICE_H

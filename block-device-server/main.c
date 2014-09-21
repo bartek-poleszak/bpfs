@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "blockDevice.h"
 
 BlockDevice init(int argc, char *argv[])
@@ -28,14 +29,23 @@ BlockDevice init(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     BlockDevice partition = init(argc, argv);
-    unsigned blockNo;
+//    unsigned blockNo;
 
-    printf("Block size: %d\n"
-           "Block count: %d\n",
-           partition.blockSize, blockNo = blockCount(partition));
-    printf("Space available: %dKB", (blockNo * partition.blockSize) / 1024);
+//    printf("Block size: %d\n"
+//           "Block count: %d\n",
+//           partition.blockSize, blockNo = blockCount(&partition));
+//    printf("Space available: %dKB", (blockNo * partition.blockSize) / 1024);
+    char buffer[partition.blockSize];
+    strcpy(buffer, "jakis testowy tekst");
 
-    close(partition.descriptor);
+    char buffer2[partition.blockSize];
+    writeBlock(&partition, 111, buffer);
+    readBlock(&partition, 111, buffer2);
+
+    puts(buffer2);
+    printf("\n");
+
+    closeBlockDevice(&partition);
     return 0;
 }
 
