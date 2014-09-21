@@ -4,11 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.c \
-    blockDevice.c
+    ../shared/blockDevice.c
 
 include(deployment.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    blockDevice.h
+    blockDevice.h \
+    ../shared/blockDevice.h
 

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "blockDevice.h"
+#include "../shared/blockDevice.h"
 
 BlockDevice init(int argc, char *argv[])
 {
