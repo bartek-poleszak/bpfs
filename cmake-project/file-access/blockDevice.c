@@ -45,7 +45,7 @@ void closeBlockDevice(BlockDevice *partition)
     close(partition->descriptor);
 }
 
-void readBlock(BlockDevice *partition, int blockNumber, char *buffer)
+void readBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
 {
     seekToBlock(partition, blockNumber);
     int bytesRead = read(partition->descriptor, buffer, partition->blockSize);
@@ -56,7 +56,7 @@ void readBlock(BlockDevice *partition, int blockNumber, char *buffer)
 }
 
 
-void writeBlock(BlockDevice *partition, int blockNumber, char *buffer)
+void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
 {
     seekToBlock(partition, blockNumber);
     int bytesWritten = write(partition->descriptor, buffer, partition->blockSize);

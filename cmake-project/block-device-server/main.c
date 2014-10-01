@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "../shared/blockDevice.h"
+#include "blockDevice.h"
 
 BlockDevice init(int argc, char *argv[])
 {
@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
     strcpy(buffer, "jakis testowy tekst");
 
     char buffer2[partition.blockSize];
-    writeBlock(&partition, 111, buffer);
-    readBlock(&partition, 111, buffer2);
+    writeBlockDevice(&partition, 111, buffer);
+    readBlockDevice(&partition, 111, buffer2);
 
     puts(buffer2);
     printf("\n");
