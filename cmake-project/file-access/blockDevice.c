@@ -61,7 +61,7 @@ void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
     seekToBlock(partition, blockNumber);
     int bytesWritten = write(partition->descriptor, buffer, partition->blockSize);
     if (bytesWritten  != partition->blockSize) {
-        perror("readBlock");
+        perror("writeBlock");
         exit(1);
     }
 }
