@@ -11,12 +11,15 @@ class PartitionHeader
 private:
     static const std::string IDENTIFIER;
     uint32_t blockSize;
-    uint32_t blockNumber;
+    uint64_t blockNumber;
 public:
-    static const int SIZE = 1024;
+    static const int BLOCK = 0;
     PartitionHeader();
+    PartitionHeader(IDisk &disk);
     void writeToDisk(IDisk &disk);
-    void writeUintToBuffer(uint32_t value, char *buffer, int position);
+    void writeUintToBuffer(unsigned long long value, char *buffer, int position, int bytes);
+    uint32_t getBlockSize() const;
+    uint32_t getBlockNumber() const;
 };
 
 #endif // PARTITIONHEADER_H

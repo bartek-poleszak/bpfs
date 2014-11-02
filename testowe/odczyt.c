@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 int main() {
-    int partition = open("/dev/sdb1", O_RDONLY);
+    int partition = open("/dev/sda2", O_RDONLY);
     if (partition < 0) {
         fprintf(stderr, "Nie udalo sie otworzyc pliku!\n");
         perror(NULL);
@@ -14,7 +14,7 @@ int main() {
     }
     
     char buff[100];
-    ssize_t bytes = read(partition, buff, 5);
+    ssize_t bytes = read(partition, buff, 100);
     if (bytes < 0) {
         fprintf(stderr, "Nie udalo sie odczytac!\n");
         perror(NULL);

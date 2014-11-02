@@ -10,11 +10,12 @@ private:
     BlockDevice partition;
 
 public:
-    FileDisk(char *filePath, int blockSize);
+    FileDisk(const char *filePath, int blockSize);
     ~FileDisk();
     void readBlock(int blockNumber, char *buffer);
     void writeBlock(int blockNumber, char *buffer);
     int getBlockSize();
+    unsigned long long getBlockNumber();
 };
 
 #endif // FILEDISK_H

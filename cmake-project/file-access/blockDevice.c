@@ -27,7 +27,7 @@ off_t seekToBlock(BlockDevice *partition, int blockNumber)
 /// \return file descriptor if file is opened, terminates if error occured
 ///
 
-BlockDevice openBlockDevice(char *path, int blockSize)
+BlockDevice openBlockDevice(const char *path, int blockSize)
 {
     BlockDevice result;
     result.descriptor = open(path, O_RDWR | O_SYNC);
@@ -67,15 +67,16 @@ void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
 }
 
 
-unsigned blockCount(BlockDevice *partition)
+unsigned long long blockCount(BlockDevice *partition)
 {
     char buffer[partition->blockSize];
     seekToBlock(partition, 0);
 
-    int result = 0;
+    unsigned long long result = 0;
     int bytesRead;
     while ((bytesRead = read(partition->descriptor, buffer, partition->blockSize)) == partition->blockSize) {
         result++;
     }
+
     return result;
 }

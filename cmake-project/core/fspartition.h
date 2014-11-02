@@ -10,6 +10,7 @@ class FSPartition
 private:
     IDisk *disk;
 public:
+    static const int INODE_TABLE_BLOCK = 1;
 
     FSPartition(IDisk *disk);
 };

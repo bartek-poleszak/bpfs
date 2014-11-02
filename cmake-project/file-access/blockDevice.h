@@ -11,11 +11,11 @@ typedef struct {
     int blockSize;
 } BlockDevice;
 
-BlockDevice openBlockDevice(char *path, int blockSIze);
+BlockDevice openBlockDevice(const char *path, int blockSIze);
 void closeBlockDevice(BlockDevice *partition);
 void readBlockDevice(BlockDevice *partition, int blockNumber, char *buffer);
 void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer);
-unsigned blockCount(BlockDevice *partition);
+unsigned long long blockCount(BlockDevice *partition);
 
 #ifdef __cplusplus
 }
