@@ -1,4 +1,5 @@
 #include "partitionheader.h"
+#include "rawdatautils.h"
 
 std::string const PartitionHeader::IDENTIFIER = "BPFS";
 
@@ -14,18 +15,6 @@ PartitionHeader::PartitionHeader()
     this->blockSize = 0;
 }
 
-
-void PartitionHeader::writeUintToBuffer(unsigned long long value, char *buffer, int position, int bytes)
-{
-    for (int i = 0; i < bytes; ++i) {
-        char val = value % 256;
-        buffer[position + i] = val;
-//        buffer[position + i] = bytes;
-        value = value >> 8;
-    }
-}
-
-#include <iostream>
 using namespace std;
 void PartitionHeader::writeToDisk(IDisk &disk)
 {
@@ -33,16 +22,15 @@ void PartitionHeader::writeToDisk(IDisk &disk)
 
     int i;
     for (i = 0; i < IDENTIFIER.size(); ++i) {
-        cout << "dupa " << IDENTIFIER.at(i) << endl;
         buffer[i] = IDENTIFIER.at(i);
     }
 
     blockSize = disk.getBlockSize();
     blockNumber = disk.getBlockNumber();
 
-    writeUintToBuffer(blockSize, buffer, i, sizeof(blockSize));
+    RawDataUtils::writeUintToBuffer(blockSize, buffer, i, sizeof(blockSize));
     i += sizeof(blockSize);
-    writeUintToBuffer(blockNumber, buffer, i, sizeof(blockNumber));
+    RawDataUtils::writeUintToBuffer(blockNumber, buffer, i, sizeof(blockNumber));
     i += sizeof(blockNumber);
 
     //fill rest of array with zeroes
@@ -50,9 +38,9 @@ void PartitionHeader::writeToDisk(IDisk &disk)
         buffer[i] = 0;
     }
 
-    for (int i = 0; i < 50; ++i) {
-        std::cout << i << ":" << (int)((unsigned char)buffer[i]) << std::endl;
-    }
+//    for (int i = 0; i < 50; ++i) {
+//        std::cout << i << ":" << (int)((unsigned char)buffer[i]) << std::endl;
+//    }
     disk.writeBlock(BLOCK, buffer);
 }
 
