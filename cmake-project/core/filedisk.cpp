@@ -20,7 +20,7 @@ void FileDisk::writeBlock(int blockNumber, char *buffer)
     writeBlockDevice(&partition, blockNumber, buffer);
 }
 
-int FileDisk::getBlockSize()
+unsigned FileDisk::getBlockSize()
 {
     return partition.blockSize;
 }

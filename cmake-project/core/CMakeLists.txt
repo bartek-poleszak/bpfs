@@ -2,6 +2,7 @@ aux_source_directory(. SRC_LIST)
 
 add_definitions(
     -std=c++11
+    -Wall
 )
 
 add_executable(core ${SRC_LIST})

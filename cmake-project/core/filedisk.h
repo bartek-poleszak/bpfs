@@ -14,7 +14,7 @@ public:
     ~FileDisk();
     void readBlock(int blockNumber, char *buffer);
     void writeBlock(int blockNumber, char *buffer);
-    int getBlockSize();
+    unsigned getBlockSize();
     unsigned long long getBlockNumber();
 };
 
