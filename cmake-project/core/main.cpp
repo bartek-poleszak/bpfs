@@ -42,12 +42,15 @@ void deployTests() {
 
 int main()
 {
-//    FileDisk disk("/dev/sda2", 1024);
+    FileDisk disk("/dev/sda2", 1024);
 //    PartitionHeader header;
-//    header.writeToDisk(disk);
+//    header.writeToDisk(disk, 256);
 
-    deployTests();
-
+    PartitionHeader header(disk);
+    cout << "Block number: " << header.getBlockNumber() << endl
+         << "Block size: " << header.getBlockSize() << endl
+         << "Inode size: " << header.getINodeSize() << endl;
+//    deployTests();
     return 0;
 }
 

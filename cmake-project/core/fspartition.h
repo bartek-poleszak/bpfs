@@ -3,17 +3,22 @@
 
 #include <string>
 #include "idisk.h"
-#include "partitionheader.h"
+#include "ifreeblockmanager.h"
+
+class PartitionHeader;
 
 class FSPartition
 {
 private:
     IDisk *disk;
-    PartitionHeader header;
+    PartitionHeader *header;
+    IFreeBlockManager *freeBlockManager;
 public:
     static const int INODE_TABLE_BLOCK = 1;
 
     FSPartition(IDisk *disk);
+    ~FSPartition();
+    PartitionHeader *getHeader() const;
 };
 
 #endif // FSPARTITION_H
