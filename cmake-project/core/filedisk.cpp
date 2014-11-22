@@ -1,6 +1,6 @@
 #include "filedisk.h"
 
-FileDisk::FileDisk(const char *filePath, int blockSize)
+FileDisk::FileDisk(const char *filePath, BlockSize blockSize)
 {
     partition = openBlockDevice(filePath, blockSize);
 }
@@ -10,22 +10,22 @@ FileDisk::~FileDisk()
     closeBlockDevice(&partition);
 }
 
-void FileDisk::readBlock(int blockNumber, char *buffer)
+void FileDisk::readBlock(BlockId blockNumber, char *buffer)
 {
     readBlockDevice(&partition, blockNumber, buffer);
 }
 
-void FileDisk::writeBlock(int blockNumber, char *buffer)
+void FileDisk::writeBlock(BlockId blockNumber, char *buffer)
 {
     writeBlockDevice(&partition, blockNumber, buffer);
 }
 
-unsigned FileDisk::getBlockSize()
+BlockSize FileDisk::getBlockSize()
 {
     return partition.blockSize;
 }
 
-unsigned long long FileDisk::getBlockNumber()
+BlockCount FileDisk::getBlockNumber()
 {
     return blockCount(&partition);
 }

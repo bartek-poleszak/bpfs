@@ -1,14 +1,13 @@
 #ifndef IFILEMANAGER_H
 #define IFILEMANAGER_H
 
-#include <cstdint>
-#include <stdint.h>
+#include "bpfstypes.h"
 
 class IFreeBlockManager {
 public:
     virtual ~IFreeBlockManager();
-    virtual uint64_t getFreeBlock() = 0;
-    virtual uint64_t freeBlockCount() = 0;
+    virtual BlockId getFreeBlock() = 0;
+    virtual BlockCount freeBlockCount() = 0;
     virtual bool isFull() = 0;
 };
 

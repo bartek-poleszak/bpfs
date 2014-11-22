@@ -15,17 +15,17 @@ private:
     static const int BLOCK_NUMBER_OFFSET = 8;
     static const int INODE_SIZE_OFFSET = 16;
 
-    uint32_t blockSize;
-    uint64_t blockNumber;
-    uint16_t iNodeSize;
+    BlockSize blockSize;
+    BlockCount blockCount;
+    InodeSize iNodeSize;
 public:
     static const int HEADER_BLOCK = 0;
     PartitionHeader();
     PartitionHeader(IDisk &disk);
-    void writeToDisk(IDisk &disk, uint16_t iNodeSize);
-    uint32_t getBlockSize() const;
-    uint64_t getBlockNumber() const;
-    uint16_t getINodeSize() const;
+    void writeToDisk(IDisk &disk, InodeSize iNodeSize);
+    BlockSize getBlockSize() const;
+    BlockCount getBlockCount() const;
+    InodeSize getINodeSize() const;
 };
 
 #endif // PARTITIONHEADER_H

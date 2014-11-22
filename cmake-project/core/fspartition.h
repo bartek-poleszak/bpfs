@@ -19,6 +19,10 @@ public:
     FSPartition(IDisk *disk);
     ~FSPartition();
     PartitionHeader *getHeader() const;
+    BlockSize getBlockSize();
+    BlockId getFreeBlock();
+    void writeDataBlock(BlockId blockNumber, char *buffer);
+    void readDataBlock(BlockId blockNumber, char *buffer);
 };
 
 #endif // FSPARTITION_H

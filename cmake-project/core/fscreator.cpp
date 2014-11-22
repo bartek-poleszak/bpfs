@@ -10,7 +10,7 @@ void FSCreator::createINodeTable(IDisk &partition)
 
 }
 
-FSCreator::FSCreator(int blockSize)
+FSCreator::FSCreator(BlockSize blockSize)
 {
 }
 

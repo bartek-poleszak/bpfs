@@ -5,14 +5,15 @@ SimpleFreeBlockManager::SimpleFreeBlockManager(PartitionHeader *header) {
     this->nextFreeBlock = 300;
 }
 
-uint64_t SimpleFreeBlockManager::getFreeBlock()
+BlockId SimpleFreeBlockManager::getFreeBlock()
 {
+    nextFreeBlock += 5;
     return nextFreeBlock++;
 }
 
-uint64_t SimpleFreeBlockManager::freeBlockCount()
+BlockCount SimpleFreeBlockManager::freeBlockCount()
 {
-    return header->getBlockNumber() - nextFreeBlock;
+    return header->getBlockCount() - nextFreeBlock;
 }
 
 bool SimpleFreeBlockManager::isFull()

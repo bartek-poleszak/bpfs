@@ -1,15 +1,15 @@
 #ifndef PERMISSIONS_H
 #define PERMISSIONS_H
 
-#include <cstdint>
+#include "bpfstypes.h"
 
 class Permissions
 {
 public:
-    Permissions(uint16_t rawData);
+    Permissions(RawPermissions rawData);
     Permissions(unsigned type, unsigned u, unsigned g, unsigned o);
 
-    uint16_t getRawData();
+    RawPermissions getRawData();
     static unsigned getRawDataSize();
 };
 

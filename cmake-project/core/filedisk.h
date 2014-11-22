@@ -3,6 +3,7 @@
 
 #include "idisk.h"
 #include "blockDevice.h"
+#include "bpfstypes.h"
 
 class FileDisk : public IDisk
 {
@@ -10,12 +11,12 @@ private:
     BlockDevice partition;
 
 public:
-    FileDisk(const char *filePath, int blockSize);
+    FileDisk(const char *filePath, BlockSize blockSize);
     ~FileDisk();
-    void readBlock(int blockNumber, char *buffer);
-    void writeBlock(int blockNumber, char *buffer);
-    unsigned getBlockSize();
-    unsigned long long getBlockNumber();
+    void readBlock(BlockId blockNumber, char *buffer);
+    void writeBlock(BlockId blockNumber, char *buffer);
+    BlockSize getBlockSize();
+    BlockCount getBlockNumber();
 };
 
 #endif // FILEDISK_H

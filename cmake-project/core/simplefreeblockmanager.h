@@ -7,11 +7,11 @@
 class SimpleFreeBlockManager : public IFreeBlockManager {
 private:
     PartitionHeader *header;
-    uint64_t nextFreeBlock;
+    BlockId nextFreeBlock;
 public:
     SimpleFreeBlockManager(PartitionHeader *header);
-    uint64_t getFreeBlock();
-    uint64_t freeBlockCount();
+    BlockId getFreeBlock();
+    BlockCount freeBlockCount();
     bool isFull();
 };
 

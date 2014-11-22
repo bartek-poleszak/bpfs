@@ -20,3 +20,22 @@ PartitionHeader *FSPartition::getHeader() const
     return header;
 }
 
+BlockSize FSPartition::getBlockSize()
+{
+    return header->getBlockSize();
+}
+
+BlockId FSPartition::getFreeBlock()
+{
+    return freeBlockManager->getFreeBlock();
+}
+
+void FSPartition::writeDataBlock(BlockId blockNumber, char *buffer)
+{
+    disk->writeBlock(blockNumber, buffer);
+}
+
+void FSPartition::readDataBlock(BlockId blockNumber, char *buffer)
+{
+    disk->readBlock(blockNumber, buffer);
+}

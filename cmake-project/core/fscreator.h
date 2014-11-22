@@ -10,7 +10,7 @@ private:
     void createHeader(IDisk &partition);
     void createINodeTable(IDisk &partition);
 public:
-    FSCreator(int blockSize);
+    FSCreator(BlockSize blockSize);
     FSPartition createFilesystem(IDisk &partition);
 };
 

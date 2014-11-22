@@ -4,20 +4,20 @@
 std::string const PartitionHeader::IDENTIFIER = "BPFS";
 
 
-uint32_t PartitionHeader::getBlockSize() const
+BlockSize PartitionHeader::getBlockSize() const
 {
     return blockSize;
 }
 
 
-uint16_t PartitionHeader::getINodeSize() const
+InodeSize PartitionHeader::getINodeSize() const
 {
     return iNodeSize;
 }
 
 PartitionHeader::PartitionHeader()
 {
-    this->blockNumber = 0;
+    this->blockCount = 0;
     this->blockSize = 0;
     this->iNodeSize = 0;
 }
@@ -26,14 +26,14 @@ PartitionHeader::PartitionHeader(IDisk &disk)
 {
     char buffer[disk.getBlockSize()];
     disk.readBlock(HEADER_BLOCK, buffer);
-    blockNumber = RawDataUtils::readUintFromBuffer(buffer, BLOCK_NUMBER_OFFSET, sizeof(blockNumber));
+    blockCount = RawDataUtils::readUintFromBuffer(buffer, BLOCK_NUMBER_OFFSET, sizeof(blockCount));
     blockSize = RawDataUtils::readUintFromBuffer(buffer, BLOCK_SIZE_OFFSET, sizeof(blockSize));
     iNodeSize = RawDataUtils::readUintFromBuffer(buffer, INODE_SIZE_OFFSET, sizeof(iNodeSize));
 }
 
 //#include <iostream>
 //using namespace std;
-void PartitionHeader::writeToDisk(IDisk &disk, uint16_t iNodeSize)
+void PartitionHeader::writeToDisk(IDisk &disk, InodeSize iNodeSize)
 {
     this->iNodeSize = iNodeSize;
     char buffer[disk.getBlockSize()];
@@ -43,10 +43,10 @@ void PartitionHeader::writeToDisk(IDisk &disk, uint16_t iNodeSize)
     }
 
     blockSize = disk.getBlockSize();
-    blockNumber = disk.getBlockNumber();
+    blockCount = disk.getBlockNumber();
 
     RawDataUtils::writeUintToBuffer(blockSize, buffer, BLOCK_SIZE_OFFSET, sizeof(blockSize));
-    RawDataUtils::writeUintToBuffer(blockNumber, buffer, BLOCK_NUMBER_OFFSET, sizeof(blockNumber));
+    RawDataUtils::writeUintToBuffer(blockCount, buffer, BLOCK_NUMBER_OFFSET, sizeof(blockCount));
     RawDataUtils::writeUintToBuffer(this->iNodeSize, buffer, INODE_SIZE_OFFSET, sizeof(this->iNodeSize));
 
     //fill rest of array with zeroes
@@ -60,7 +60,7 @@ void PartitionHeader::writeToDisk(IDisk &disk, uint16_t iNodeSize)
     disk.writeBlock(HEADER_BLOCK, buffer);
 }
 
-uint64_t PartitionHeader::getBlockNumber() const
+BlockCount PartitionHeader::getBlockCount() const
 {
-    return blockNumber;
+    return blockCount;
 }
