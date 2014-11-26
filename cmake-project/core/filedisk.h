@@ -16,7 +16,7 @@ public:
     void readBlock(BlockId blockNumber, char *buffer);
     void writeBlock(BlockId blockNumber, char *buffer);
     BlockSize getBlockSize();
-    BlockCount getBlockNumber();
+    BlockCount getBlockCount();
 };
 
 #endif // FILEDISK_H

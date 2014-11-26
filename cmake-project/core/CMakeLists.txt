@@ -7,6 +7,7 @@ add_definitions(
 )
 
 add_library(core ${SRC_LIST} ${HEADER_FILES})
+#add_library(core filedisk.cpp)
 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 #add_executable(core ${SRC_LIST})

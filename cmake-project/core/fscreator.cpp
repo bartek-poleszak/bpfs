@@ -1,23 +1,19 @@
 #include "fscreator.h"
+#include "partitionheader.h"
 
-void FSCreator::createHeader(IDisk &partition)
+FSCreator::FSCreator()
 {
 
 }
 
-void FSCreator::createINodeTable(IDisk &partition)
+void FSCreator::createFilesystem(IDisk &disk, BlockSize blockSize, InodeSize inodeSize, InodeCount inodeCount)
 {
+    PartitionHeader header;
+    header.writeToDisk(disk, inodeSize, inodeCount);
 
-}
+    InodeTable table(inodeCount, inodeSize, blockSize);
+    table.writeAllToDisk(disk);
 
-FSCreator::FSCreator(BlockSize blockSize)
-{
-}
-
-FSPartition FSCreator::createFilesystem(IDisk &partition)
-{
-    createHeader(partition);
-    createINodeTable(partition);
 }
 
 

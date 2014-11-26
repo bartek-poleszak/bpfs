@@ -14,18 +14,21 @@ private:
     static const int BLOCK_SIZE_OFFSET = 4;
     static const int BLOCK_NUMBER_OFFSET = 8;
     static const int INODE_SIZE_OFFSET = 16;
+    static const int INODE_COUNT_OFFSET = 18;
 
     BlockSize blockSize;
     BlockCount blockCount;
-    InodeSize iNodeSize;
+    InodeSize inodeSize;
+    InodeCount inodeCount;
 public:
     static const int HEADER_BLOCK = 0;
     PartitionHeader();
     PartitionHeader(IDisk &disk);
-    void writeToDisk(IDisk &disk, InodeSize iNodeSize);
+    void writeToDisk(IDisk &disk, InodeSize inodeSize, InodeCount inodeCount);
     BlockSize getBlockSize() const;
     BlockCount getBlockCount() const;
-    InodeSize getINodeSize() const;
+    InodeSize getInodeSize() const;
+    InodeCount getInodeCount() const;
 };
 
 #endif // PARTITIONHEADER_H

@@ -76,6 +76,7 @@ unsigned long long blockCount(BlockDevice *partition)
     int bytesRead;
     while ((bytesRead = read(partition->descriptor, buffer, partition->blockSize)) == partition->blockSize) {
         result++;
+        printf("blockCount: %lld\n", result);
     }
 
     return result;

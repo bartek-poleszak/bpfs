@@ -10,16 +10,22 @@ BlockSize PartitionHeader::getBlockSize() const
 }
 
 
-InodeSize PartitionHeader::getINodeSize() const
+InodeSize PartitionHeader::getInodeSize() const
 {
-    return iNodeSize;
+    return inodeSize;
+}
+
+InodeCount PartitionHeader::getInodeCount() const
+{
+    return inodeCount;
 }
 
 PartitionHeader::PartitionHeader()
 {
     this->blockCount = 0;
     this->blockSize = 0;
-    this->iNodeSize = 0;
+    this->inodeSize = 0;
+    this->inodeCount = 0;
 }
 
 PartitionHeader::PartitionHeader(IDisk &disk)
@@ -28,14 +34,16 @@ PartitionHeader::PartitionHeader(IDisk &disk)
     disk.readBlock(HEADER_BLOCK, buffer);
     blockCount = RawDataUtils::readUintFromBuffer(buffer, BLOCK_NUMBER_OFFSET, sizeof(blockCount));
     blockSize = RawDataUtils::readUintFromBuffer(buffer, BLOCK_SIZE_OFFSET, sizeof(blockSize));
-    iNodeSize = RawDataUtils::readUintFromBuffer(buffer, INODE_SIZE_OFFSET, sizeof(iNodeSize));
+    inodeSize = RawDataUtils::readUintFromBuffer(buffer, INODE_SIZE_OFFSET, sizeof(inodeSize));
+    inodeCount = RawDataUtils::readUintFromBuffer(buffer, INODE_COUNT_OFFSET, sizeof(inodeCount));
 }
 
 //#include <iostream>
 //using namespace std;
-void PartitionHeader::writeToDisk(IDisk &disk, InodeSize iNodeSize)
+void PartitionHeader::writeToDisk(IDisk &disk, InodeSize inodeSize, InodeCount inodeCount)
 {
-    this->iNodeSize = iNodeSize;
+    this->inodeSize = inodeSize;
+    this->inodeCount = inodeCount;
     char buffer[disk.getBlockSize()];
 
     for (unsigned i = IDENTIFIER_OFFSET; i < IDENTIFIER.size(); ++i) {
@@ -43,14 +51,15 @@ void PartitionHeader::writeToDisk(IDisk &disk, InodeSize iNodeSize)
     }
 
     blockSize = disk.getBlockSize();
-    blockCount = disk.getBlockNumber();
+    blockCount = disk.getBlockCount();
 
     RawDataUtils::writeUintToBuffer(blockSize, buffer, BLOCK_SIZE_OFFSET, sizeof(blockSize));
     RawDataUtils::writeUintToBuffer(blockCount, buffer, BLOCK_NUMBER_OFFSET, sizeof(blockCount));
-    RawDataUtils::writeUintToBuffer(this->iNodeSize, buffer, INODE_SIZE_OFFSET, sizeof(this->iNodeSize));
+    RawDataUtils::writeUintToBuffer(this->inodeSize, buffer, INODE_SIZE_OFFSET, sizeof(this->inodeSize));
+    RawDataUtils::writeUintToBuffer(this->inodeCount, buffer, INODE_COUNT_OFFSET, sizeof(this->inodeCount));
 
     //fill rest of array with zeroes
-    for (unsigned i = INODE_SIZE_OFFSET + sizeof(this->iNodeSize); i < disk.getBlockSize(); ++i) {
+    for (unsigned i = INODE_COUNT_OFFSET + sizeof(this->inodeCount); i < disk.getBlockSize(); ++i) {
         buffer[i] = 0;
     }
 

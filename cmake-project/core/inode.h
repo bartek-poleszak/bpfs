@@ -28,6 +28,8 @@ private:
 
     BlockId *dataBlocks;
     unsigned dataBlocksInNode;
+    InodeId index;
+
     unsigned getDataBlockOffset(unsigned blockNumber);
 public:
     static const InodeSize MIN_SIZE = 32;
@@ -41,6 +43,9 @@ public:
     BlockSize getLastBlockByteCount() const;
     void setLastBlockByteCount(const BlockSize &value);
     BlockCount getBlockCount();
+    InodeId getIndex() {
+        return index;
+    }
 };
 
 #endif // INODE_H

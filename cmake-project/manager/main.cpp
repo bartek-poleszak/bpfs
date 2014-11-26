@@ -46,16 +46,17 @@ void deployTests() {
 
 int main()
 {
-    FileDisk disk("/dev/sda2", 1024);
+    FileDisk disk("/dev/sdb1", 1024);
 ////    PartitionHeader header;
 ////    header.writeToDisk(disk, 256);
 
-//    PartitionHeader header(disk);
-//    cout << "Block number: " << header.getBlockCount() << endl
-//         << "Block size: " << header.getBlockSize() << endl
-//         << "Inode size: " << header.getINodeSize() << endl;
+    PartitionHeader header(disk);
+    cout << "Block count: " << header.getBlockCount() << endl
+         << "Block size: " << header.getBlockSize() << endl
+         << "Inode size: " << header.getInodeSize() << endl
+         << "Inode count: " << header.getInodeCount() << endl;
 ////    deployTests();
-    FSPartition partition(&disk);
+    /*FSPartition partition(&disk);
     INode inode(256);
     File file(&inode, &partition);
 
@@ -71,7 +72,14 @@ int main()
     file.get(plikOut);
 
     plikIn.close();
-    plikOut.close();
+    plikOut.close();*/
 
+    return 0;
+}
+#include "fscreator.h"
+int mainn() {
+    FileDisk disk("/dev/sdb1", 1024);
+    FSCreator creator;
+    creator.createFilesystem(disk, 1024, 256, 4);
     return 0;
 }

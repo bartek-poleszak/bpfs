@@ -25,7 +25,7 @@ BlockSize FileDisk::getBlockSize()
     return partition.blockSize;
 }
 
-BlockCount FileDisk::getBlockNumber()
+BlockCount FileDisk::getBlockCount()
 {
     return blockCount(&partition);
 }

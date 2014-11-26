@@ -6,12 +6,9 @@
 
 class FSCreator
 {
-private:
-    void createHeader(IDisk &partition);
-    void createINodeTable(IDisk &partition);
 public:
-    FSCreator(BlockSize blockSize);
-    FSPartition createFilesystem(IDisk &partition);
+    FSCreator();
+    void createFilesystem(IDisk &partition, BlockSize blockSize, InodeSize inodeSize, InodeCount inodeCount);
 };
 
 #endif // FSCREATOR_H
