@@ -23,9 +23,10 @@ public:
     PartitionHeader *getHeader() const;
     BlockSize getBlockSize();
     BlockId getFreeBlock();
-    INode *getInode(InodeId inodeId);
+    Inode *getInode(InodeId inodeId);
     void writeDataBlock(BlockId blockNumber, char *buffer);
     void readDataBlock(BlockId blockNumber, char *buffer);
+    void flushInodeTable();
     BlockId getFirstDataBlock();
 };
 

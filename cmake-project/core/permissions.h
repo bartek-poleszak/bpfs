@@ -13,4 +13,5 @@ public:
     static unsigned getRawDataSize();
 };
 
+
 #endif // PERMISSIONS_H

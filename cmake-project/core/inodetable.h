@@ -12,7 +12,7 @@ class WrongInodeCountException : public std::exception {};
 class InodeTable
 {
 private:
-    INode tmp;
+    Inode tmp;
     BlockSize blockSize;
     InodeSize inodeSize;
     InodeCount inodeCount;
@@ -22,7 +22,7 @@ public:
     InodeTable(InodeCount inodeCount, InodeSize inodeSize, BlockSize blockSize);
     InodeTable(IDisk &disk, PartitionHeader *header);
     void writeAllToDisk(IDisk &disk);
-    INode *getInode(InodeId inodeId);
+    Inode *getInode(InodeId inodeId);
     BlockCount getTableSize();
 //    INode *getFreeInode();
     void calculateSize();

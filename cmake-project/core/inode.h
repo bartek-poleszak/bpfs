@@ -8,7 +8,7 @@
 class WrongINodeSizeException : public std::exception {};
 class MaximumFileSizeAchievedException : public std::exception {};
 
-class INode
+class Inode
 {
 private:
     unsigned size;
@@ -23,18 +23,18 @@ private:
 
     Permissions *permissions;
     uint8_t hardLinkCount;
-    BlockCount blockCount;
+    BlockCount sizeInBlocks;
     BlockSize lastBlockByteCount;
 
     BlockId *dataBlocks;
-    unsigned dataBlocksInNode;
+    unsigned dataBlocksPerNode;
     InodeId index;
 
     unsigned getDataBlockOffset(unsigned blockNumber);
 public:
     static const InodeSize MIN_SIZE = 32;
-    INode(InodeSize size);
-    ~INode();
+    Inode(InodeSize size);
+    ~Inode();
     void readFromBuffer(char *buffer, unsigned position);
     void writeToBuffer(char *buffer, unsigned position);
 
@@ -42,10 +42,9 @@ public:
     BlockId getDataBlockNumber(BlockCount sequenceNumber);
     BlockSize getLastBlockByteCount() const;
     void setLastBlockByteCount(const BlockSize &value);
-    BlockCount getBlockCount();
-    InodeId getIndex() {
-        return index;
-    }
+    BlockCount getSizeInBlocks();
+    InodeId getIndex();
+    void clearForDebug();
 };
 
 #endif // INODE_H

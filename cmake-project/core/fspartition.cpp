@@ -32,7 +32,7 @@ BlockId FSPartition::getFreeBlock()
     return freeBlockManager->getFreeBlock();
 }
 
-INode *FSPartition::getInode(InodeId inodeId)
+Inode *FSPartition::getInode(InodeId inodeId)
 {
     return inodeTable->getInode(inodeId);
 }
@@ -45,6 +45,11 @@ void FSPartition::writeDataBlock(BlockId blockNumber, char *buffer)
 void FSPartition::readDataBlock(BlockId blockNumber, char *buffer)
 {
     disk->readBlock(blockNumber, buffer);
+}
+
+void FSPartition::flushInodeTable()
+{
+    inodeTable->writeAllToDisk(*disk);
 }
 
 BlockId FSPartition::getFirstDataBlock()

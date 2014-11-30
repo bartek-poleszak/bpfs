@@ -44,8 +44,14 @@ void deployTests() {
 #include "file.h"
 #include <fstream>
 
-int main()
+
+
+int main/*Write*/(int argc, char *argv[])
 {
+//    if (argc != 2) {
+//        throw "Zla liczba argumentow!";
+//    }
+//    FileDisk disk(argv[1], 1024);
     FileDisk disk("/dev/sdb1", 1024);
 ////    PartitionHeader header;
 ////    header.writeToDisk(disk, 256);
@@ -56,6 +62,26 @@ int main()
          << "Inode size: " << header.getInodeSize() << endl
          << "Inode count: " << header.getInodeCount() << endl;
 ////    deployTests();
+
+    FSPartition partition(&disk);
+    Inode *inode = partition.getInode(0);
+    inode->clearForDebug();
+    File file(inode, &partition);
+
+    char napis[100] = "To jest testowy napis!!!\n";
+    ifstream fileIn;
+    fileIn.open("/home/bp/fileIn");
+    file.write(fileIn);
+    fileIn.close();
+    file.append(napis, 25);
+    partition.flushInodeTable();
+
+    ofstream plikOut;
+    plikOut.open("/home/bp/fileOut2");
+    cout << "Odczyt" << endl;
+    file.get(plikOut);
+    plikOut.close();
+
     /*FSPartition partition(&disk);
     INode inode(256);
     File file(&inode, &partition);

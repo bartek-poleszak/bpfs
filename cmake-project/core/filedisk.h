@@ -19,4 +19,5 @@ public:
     BlockCount getBlockCount();
 };
 
+
 #endif // FILEDISK_H

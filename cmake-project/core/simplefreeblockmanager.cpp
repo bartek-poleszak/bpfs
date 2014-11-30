@@ -2,12 +2,12 @@
 
 SimpleFreeBlockManager::SimpleFreeBlockManager(PartitionHeader *header) {
     this->header = header;
-    this->nextFreeBlock = 300;
+    this->nextFreeBlock = 50;
 }
 
 BlockId SimpleFreeBlockManager::getFreeBlock()
 {
-    nextFreeBlock += 5;
+//    nextFreeBlock += 1;
     return nextFreeBlock++;
 }
 
@@ -18,7 +18,7 @@ BlockCount SimpleFreeBlockManager::freeBlockCount()
 
 bool SimpleFreeBlockManager::isFull()
 {
-    if (getFreeBlock() == 0)
+    if (freeBlockCount() == 0)
         return true;
     return false;
 }
