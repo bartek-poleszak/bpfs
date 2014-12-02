@@ -2,6 +2,9 @@
 #define BPFSTYPES_H
 
 #include <cstdint>
+#include <exception>
+
+class NotImplementedYetException : std::exception {};
 
 typedef uint64_t BlockId;
 typedef uint64_t BlockCount;

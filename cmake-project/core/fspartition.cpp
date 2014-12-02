@@ -49,7 +49,7 @@ void FSPartition::readDataBlock(BlockId blockNumber, char *buffer)
 
 void FSPartition::flushInodeTable()
 {
-    inodeTable->writeAllToDisk(*disk);
+    inodeTable->writeAllToDisk();
 }
 
 BlockId FSPartition::getFirstDataBlock()

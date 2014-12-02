@@ -2,6 +2,7 @@
 #define INODETABLE_H
 
 #include <exception>
+#include <map>
 #include "inode.h"
 #include "idisk.h"
 #include "partitionheader.h"
@@ -12,20 +13,24 @@ class WrongInodeCountException : public std::exception {};
 class InodeTable
 {
 private:
-    Inode tmp;
+    IDisk *disk;
+    std::map<InodeId, Inode *> cachedInodes;
     BlockSize blockSize;
     InodeSize inodeSize;
     InodeCount inodeCount;
     BlockCount size;
+    Inode *getInodeFromMemory(InodeId inodeId);
+    unsigned nodesPerBlock;
+    void writeNodeToDisk(Inode *inode);
 public:
     static const int INODE_TABLE_BEGIN_BLOCK = 1;
-    InodeTable(InodeCount inodeCount, InodeSize inodeSize, BlockSize blockSize);
+    InodeTable(IDisk &disk, InodeCount inodeCount, InodeSize inodeSize, BlockSize blockSize);
     InodeTable(IDisk &disk, PartitionHeader *header);
-    void writeAllToDisk(IDisk &disk);
+    ~InodeTable();
+    void writeAllToDisk();
     Inode *getInode(InodeId inodeId);
     BlockCount getTableSize();
-//    INode *getFreeInode();
-    void calculateSize();
+    void calculateSizeAndNodesPerBlock();
 };
 
 #endif // INODETABLE_H

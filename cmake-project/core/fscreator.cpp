@@ -11,8 +11,8 @@ void FSCreator::createFilesystem(IDisk &disk, BlockSize blockSize, InodeSize ino
     PartitionHeader header;
     header.writeToDisk(disk, inodeSize, inodeCount);
 
-    InodeTable table(inodeCount, inodeSize, blockSize);
-    table.writeAllToDisk(disk);
+    InodeTable table(disk, inodeCount, inodeSize, blockSize);
+    table.writeAllToDisk();
 
 }
 

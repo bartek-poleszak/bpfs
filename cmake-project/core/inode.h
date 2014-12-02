@@ -7,11 +7,11 @@
 
 class WrongINodeSizeException : public std::exception {};
 class MaximumFileSizeAchievedException : public std::exception {};
+class UnlinkOnFreeNodeException : public std::exception {};
 
 class Inode
 {
 private:
-    unsigned size;
     static const unsigned BLOCK_ADRESS_SIZE = 8;
 
     static const unsigned TYPE_AND_PERMISSIONS_OFFSET = 0; //uint16_t
@@ -28,23 +28,30 @@ private:
 
     BlockId *dataBlocks;
     unsigned dataBlocksPerNode;
-    InodeId index;
+    InodeId id;
 
     unsigned getDataBlockOffset(unsigned blockNumber);
+
+    void clear();
 public:
+    static const InodeId INVALID_ID = 0;
     static const InodeSize MIN_SIZE = 32;
-    Inode(InodeSize size);
+    Inode(InodeSize size, FileType fileType, InodeId id);
+    Inode(InodeSize size, char *buffer, unsigned indexInBlock, InodeId id);
     ~Inode();
-    void readFromBuffer(char *buffer, unsigned position);
-    void writeToBuffer(char *buffer, unsigned position);
+    void readFromBuffer(char *buffer, unsigned inBufferOffset);
+    void writeToBuffer(char *buffer, unsigned inBufferOffset);
 
     void addDataBlock(BlockId blockNumber);
     BlockId getDataBlockNumber(BlockCount sequenceNumber);
     BlockSize getLastBlockByteCount() const;
     void setLastBlockByteCount(const BlockSize &value);
     BlockCount getSizeInBlocks();
-    InodeId getIndex();
+    InodeId getId();
+    Permissions *getPermissions();
     void clearForDebug();
+    void addLink();
+    void removeLink();
 };
 
 #endif // INODE_H

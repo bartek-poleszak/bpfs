@@ -64,23 +64,43 @@ int main/*Write*/(int argc, char *argv[])
 ////    deployTests();
 
     FSPartition partition(&disk);
+
     Inode *inode = partition.getInode(0);
-    inode->clearForDebug();
-    File file(inode, &partition);
+    File file0("b", inode, &partition);
 
-    char napis[100] = "To jest testowy napis!!!\n";
-    ifstream fileIn;
-    fileIn.open("/home/bp/fileIn");
-    file.write(fileIn);
-    fileIn.close();
-    file.append(napis, 25);
-    partition.flushInodeTable();
+    Inode *inode2 = partition.getInode(2);
+    File file2("a", inode2, &partition);
 
+//    inode2->clearForDebug();
+//    inode->clearForDebug();
+
+//    cout << "Zapis0" << endl;
+////    char napis[100] = "To jest testowy napis!!!\n";
+//    ifstream fileIn;
+//    fileIn.open("/home/bp/fileIn");
+//    file0.write(fileIn);
+//    fileIn.close();
+////    file0.append(napis, 25);
+
+//    cout << "Zapis1" << endl;
+//    ifstream fileIn2;
+//    fileIn2.open("/home/bp/fileIn2");
+//    file2.write(fileIn2);
+//    fileIn2.close();
+//    partition.flushInodeTable();
+
+    cout << "Odczyt0" << endl;
     ofstream plikOut;
-    plikOut.open("/home/bp/fileOut2");
-    cout << "Odczyt" << endl;
-    file.get(plikOut);
+    plikOut.open("/home/bp/fileOut");
+    file0.get(plikOut);
     plikOut.close();
+
+    cout << "Odczyt2" << endl;
+    ofstream plikOut2;
+    plikOut2.open("/home/bp/fileOut2");
+    file2.get(plikOut2);
+    plikOut.close();
+
 
     /*FSPartition partition(&disk);
     INode inode(256);

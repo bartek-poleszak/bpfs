@@ -1,7 +1,8 @@
 #include "file.h"
 
-File::File(Inode *inode, FSPartition *fsPartition)
+File::File(std::string name, Inode *inode, FSPartition *fsPartition)
 {
+    this->name = name;
     this->inode = inode;
     this->fsPartition = fsPartition;
 }
@@ -9,6 +10,13 @@ File::File(Inode *inode, FSPartition *fsPartition)
 File::~File()
 {
 
+}
+
+void File::read(char *buffer, uint64_t offset, uint64_t length)
+{
+    if (offset != 0 && length != 1024)
+        throw NotImplementedYetException();
+    readBlock(0, buffer);
 }
 
 void File::readBlock(BlockCount index, char *buffer)
@@ -109,4 +117,12 @@ void File::get(std::ofstream &fileStream)
     readBlock(inode->getSizeInBlocks() - 1, buffer);
     fileStream.write(buffer, inode->getLastBlockByteCount());
 
+}
+
+
+bool File::isDirectory()
+{
+    if (inode->getPermissions()->getFileType() == FileType::DIRECTORY)
+        return true;
+    return false;
 }
