@@ -2,8 +2,18 @@
 
 void InodeTable::calculateSizeAndNodesPerBlock()
 {
-    this->size = (inodeCount * inodeSize) / blockSize;
+    this->sizeInBytes = (inodeCount * inodeSize) / blockSize;
     this->nodesPerBlock = blockSize / inodeSize;
+}
+
+Inode *InodeTable::getFreeNode()
+{
+    for (int i = 0; i < inodeCount; ++i) {
+        if (getInode(i)->isFree())
+            return getInode(i);
+    }
+    throw InodeTableFullException();
+    return nullptr;
 }
 
 InodeTable::InodeTable(IDisk &disk, InodeCount inodeCount, InodeSize inodeSize, BlockSize blockSize)
@@ -72,9 +82,9 @@ Inode *InodeTable::getInode(InodeId inodeId)
     return cachedInodes[inodeId];
 }
 
-BlockCount InodeTable::getTableSize()
+BlockCount InodeTable::getSizeInBytes()
 {
-    return size;
+    return sizeInBytes;
 }
 
 

@@ -46,7 +46,7 @@ void deployTests() {
 
 
 
-int main/*Write*/(int argc, char *argv[])
+int mainw/*Write*/(int argc, char *argv[])
 {
 //    if (argc != 2) {
 //        throw "Zla liczba argumentow!";
@@ -71,23 +71,23 @@ int main/*Write*/(int argc, char *argv[])
     Inode *inode2 = partition.getInode(2);
     File file2("a", inode2, &partition);
 
-//    inode2->clearForDebug();
-//    inode->clearForDebug();
+    inode2->clearForDebug();
+    inode->clearForDebug();
 
-//    cout << "Zapis0" << endl;
-////    char napis[100] = "To jest testowy napis!!!\n";
-//    ifstream fileIn;
-//    fileIn.open("/home/bp/fileIn");
-//    file0.write(fileIn);
-//    fileIn.close();
-////    file0.append(napis, 25);
+    cout << "Zapis0" << endl;
+//    char napis[100] = "To jest testowy napis!!!\n";
+    ifstream fileIn;
+    fileIn.open("/home/bp/fileIn");
+    file0.write(fileIn);
+    fileIn.close();
+//    file0.append(napis, 25);
 
-//    cout << "Zapis1" << endl;
-//    ifstream fileIn2;
-//    fileIn2.open("/home/bp/fileIn2");
-//    file2.write(fileIn2);
-//    fileIn2.close();
-//    partition.flushInodeTable();
+    cout << "Zapis1" << endl;
+    ifstream fileIn2;
+    fileIn2.open("/home/bp/fileIn2");
+    file2.write(fileIn2);
+    fileIn2.close();
+    partition.flushInodeTable();
 
     cout << "Odczyt0" << endl;
     ofstream plikOut;
@@ -122,6 +122,37 @@ int main/*Write*/(int argc, char *argv[])
 
     return 0;
 }
+
+int main() {
+    FileDisk disk("/dev/sdb1", 1024);
+////    PartitionHeader header;
+////    header.writeToDisk(disk, 256);
+
+    PartitionHeader header(disk);
+    cout << "Block count: " << header.getBlockCount() << endl
+         << "Block size: " << header.getBlockSize() << endl
+         << "Inode size: " << header.getInodeSize() << endl
+         << "Inode count: " << header.getInodeCount() << endl;
+////    deployTests();
+
+    FSPartition partition(&disk);
+
+    Inode *inode = partition.getInode(2);
+    File file("b", inode, &partition);
+
+    char buffer[partition.getHeader()->getBlockSize()];
+
+    int bytesRead;
+    int sum = 0;
+    while ((bytesRead = file.read(buffer, 20)) > 0) {
+        sum += bytesRead;
+        for (int i = 0; i < bytesRead; ++i) {
+            cout << buffer[i];
+        }
+        cout << "bytesRead: " << bytesRead << " sum: " << sum << endl;
+    }
+}
+
 #include "fscreator.h"
 int mainn() {
     FileDisk disk("/dev/sdb1", 1024);

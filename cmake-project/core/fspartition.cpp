@@ -54,5 +54,5 @@ void FSPartition::flushInodeTable()
 
 BlockId FSPartition::getFirstDataBlock()
 {
-    return INODE_TABLE_BLOCK + inodeTable->getTableSize();
+    return INODE_TABLE_BLOCK + inodeTable->getSizeInBytes();
 }

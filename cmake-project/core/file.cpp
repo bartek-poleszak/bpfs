@@ -5,25 +5,31 @@ File::File(std::string name, Inode *inode, FSPartition *fsPartition)
     this->name = name;
     this->inode = inode;
     this->fsPartition = fsPartition;
+    this->fileReadBuffer = nullptr;
 }
 
 File::~File()
 {
-
+    if (fileReadBuffer != nullptr)
+        delete fileReadBuffer;
 }
 
-void File::read(char *buffer, uint64_t offset, uint64_t length)
+uint64_t File::read(char *buffer, uint64_t length)
 {
-    if (offset != 0 && length != 1024)
-        throw NotImplementedYetException();
-    readBlock(0, buffer);
+    if (fileReadBuffer == nullptr)
+        fileReadBuffer = new FileReadBuffer(this, fsPartition->getBlockSize());
+    return fileReadBuffer->read(buffer, length);
 }
 
-void File::readBlock(BlockCount index, char *buffer)
+BlockSize File::readBlock(BlockCount index, char *buffer)
 {
     if (index >= inode->getSizeInBlocks())
         throw BlockIndexOutOfRangeException();
     fsPartition->readDataBlock(inode->getDataBlockNumber(index), buffer);
+
+    if (index == inode->getSizeInBlocks() - 1)
+        return inode->getLastBlockByteCount();
+    return fsPartition->getBlockSize();
 }
 
 void File::writeBlock(BlockCount index, char *buffer)
@@ -125,4 +131,51 @@ bool File::isDirectory()
     if (inode->getPermissions()->getFileType() == FileType::DIRECTORY)
         return true;
     return false;
+}
+
+FileReadBuffer::FileReadBuffer(File *file, BlockSize blockSize)
+{
+    this->file = file;
+    this->blockSize = blockSize;
+    this->innerBuffer = new char[blockSize];
+    this->currentBlock = 0;
+    this->currentPositionInBuffer = 0;
+    loadNextBlock();
+}
+
+FileReadBuffer::~FileReadBuffer()
+{
+    delete [] innerBuffer;
+}
+
+uint64_t FileReadBuffer::read(char *buffer, uint64_t length)
+{
+    unsigned i;
+    for (i = 0; i < length; ++i) {
+        int byte = nextByte();
+        if (byte != END_OF_FILE)
+            buffer[i] = byte;
+        else
+            break;
+    }
+    return i;
+}
+
+int FileReadBuffer::nextByte()
+{
+    if (currentPositionInBuffer >= currentBlockSize)
+        loadNextBlock();
+    if (currentPositionInBuffer == END_OF_FILE)
+        return END_OF_FILE;
+    return innerBuffer[currentPositionInBuffer++];
+}
+
+void FileReadBuffer::loadNextBlock() {
+    try {
+        currentBlockSize = file->readBlock(currentBlock++, innerBuffer);
+        currentPositionInBuffer = 0;
+    }
+    catch (BlockIndexOutOfRangeException e) {
+        currentPositionInBuffer = END_OF_FILE;
+    }
 }

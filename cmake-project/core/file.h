@@ -11,6 +11,27 @@ class BlockIndexOutOfRangeException : public std::exception {};
 class TooManyDataForBlockException : public std::exception {};
 class NoneDataForBlockException : public std::exception {};
 
+class File;
+
+class FileReadBuffer
+{
+private:
+    File *file;
+    BlockSize blockSize;
+    int currentPositionInBuffer;
+    BlockCount currentBlock;
+    int64_t currentBlockSize;
+    char *innerBuffer;
+    int nextByte();
+    void loadNextBlock();
+public:
+    static const int END_OF_FILE = -1000;
+    FileReadBuffer(File *file, BlockSize blockSize);
+    ~FileReadBuffer();
+    uint64_t read(char *innerBuffer, uint64_t length);
+};
+
+
 class File
 {
 private:
@@ -19,11 +40,12 @@ private:
     FSPartition *fsPartition;
     void rewriteBlock(BlockCount index, char *buffer);
     BlockSize appendLastBlock(char *buffer, uint64_t significantBytes);
+    FileReadBuffer *fileReadBuffer;
 public:
     File(std::string name, Inode *inode, FSPartition *fsPartition);
     ~File();
-    void read(char *buffer, uint64_t offset, uint64_t length);
-    void readBlock(BlockCount index, char *buffer);
+    uint64_t read(char *buffer, uint64_t length);
+    BlockSize readBlock(BlockCount index, char *buffer);
     void writeBlock(BlockCount index, char *buffer);
     bool isDirectory();
     void appendByBlock(char *buffer, BlockSize significantBytes);

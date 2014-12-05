@@ -9,6 +9,7 @@
 
 class WrongInodeSizeException : public std::exception {};
 class WrongInodeCountException : public std::exception {};
+class InodeTableFullException : public std::exception {};
 
 class InodeTable
 {
@@ -18,7 +19,7 @@ private:
     BlockSize blockSize;
     InodeSize inodeSize;
     InodeCount inodeCount;
-    BlockCount size;
+    BlockCount sizeInBytes;
     Inode *getInodeFromMemory(InodeId inodeId);
     unsigned nodesPerBlock;
     void writeNodeToDisk(Inode *inode);
@@ -29,8 +30,9 @@ public:
     ~InodeTable();
     void writeAllToDisk();
     Inode *getInode(InodeId inodeId);
-    BlockCount getTableSize();
+    BlockCount getSizeInBytes();
     void calculateSizeAndNodesPerBlock();
+    Inode *getFreeNode();
 };
 
 #endif // INODETABLE_H

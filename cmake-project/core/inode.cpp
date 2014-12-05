@@ -51,6 +51,16 @@ void Inode::removeLink()
     hardLinkCount--;
 }
 
+uint8_t Inode::getHardLinkCount()
+{
+    return hardLinkCount;
+}
+
+bool Inode::isFree()
+{
+    return hardLinkCount == 0;
+}
+
 Inode::Inode(InodeSize size, FileType fileType, InodeId id)
 {
 

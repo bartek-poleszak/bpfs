@@ -52,6 +52,8 @@ public:
     void clearForDebug();
     void addLink();
     void removeLink();
+    uint8_t getHardLinkCount();
+    bool isFree();
 };
 
 #endif // INODE_H
