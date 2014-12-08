@@ -1,5 +1,12 @@
-aux_source_directory(. SRC_LIST)
-set(HEADER_FILES menuoptions.h)
+set(HEADER_FILES
+    menuoptions.h
+    main.h
+)
+set(SRC_LIST
+    main.cpp
+    prompt.cpp
+    commandresolver.cpp
+)
 
 add_definitions(
     -std=c++11

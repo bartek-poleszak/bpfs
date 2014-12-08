@@ -20,6 +20,16 @@ InodeCount PartitionHeader::getInodeCount() const
     return inodeCount;
 }
 
+void PartitionHeader::validateFilesystem(char *headerBuffer)
+{
+    std::string fromBuffer;
+    for (int i = 0; i < IDENTIFIER.size(); ++i) {
+        fromBuffer.push_back(headerBuffer[i]);
+    }
+    if (fromBuffer != IDENTIFIER)
+        throw InvalidFilesystemIdenifierException();
+}
+
 PartitionHeader::PartitionHeader()
 {
     this->blockCount = 0;
@@ -32,6 +42,7 @@ PartitionHeader::PartitionHeader(IDisk &disk)
 {
     char buffer[disk.getBlockSize()];
     disk.readBlock(HEADER_BLOCK, buffer);
+    validateFilesystem(buffer);
     blockCount = RawDataUtils::readUintFromBuffer(buffer, BLOCK_NUMBER_OFFSET, sizeof(blockCount));
     blockSize = RawDataUtils::readUintFromBuffer(buffer, BLOCK_SIZE_OFFSET, sizeof(blockSize));
     inodeSize = RawDataUtils::readUintFromBuffer(buffer, INODE_SIZE_OFFSET, sizeof(inodeSize));

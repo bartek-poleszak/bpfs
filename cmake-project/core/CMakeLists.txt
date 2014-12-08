@@ -1,5 +1,23 @@
-aux_source_directory(. SRC_LIST)
-set(HEADER_FILES bpfstypes.h)
+#aux_source_directory(. SRC_LIST)
+set(HEADER_FILES
+    bpfstypes.h
+)
+set(SRC_LIST
+    file.cpp
+    directory.cpp
+    rootdirectory.cpp
+    filedisk.cpp
+    fscreator.cpp
+    fspartition.cpp
+    idisk.cpp
+    ifreeblockmanager.cpp
+    inode.cpp
+    inodetable.cpp
+    partitionheader.cpp
+    permissions.cpp
+    rawdatautils.cpp
+    simplefreeblockmanager.cpp
+)
 
 add_definitions(
     -std=c++11

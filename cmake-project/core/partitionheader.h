@@ -5,6 +5,9 @@
 
 #include <string>
 #include <cstdint>
+#include <exception>
+
+class InvalidFilesystemIdenifierException : public std::exception {};
 
 class PartitionHeader
 {
@@ -20,6 +23,8 @@ private:
     BlockCount blockCount;
     InodeSize inodeSize;
     InodeCount inodeCount;
+
+    void validateFilesystem(char *headerBuffer);
 public:
     static const int HEADER_BLOCK = 0;
     PartitionHeader();

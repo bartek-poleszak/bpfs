@@ -2,12 +2,12 @@
 #include "simplefreeblockmanager.h"
 #include "partitionheader.h"
 
-FSPartition::FSPartition(IDisk *disk)
+FSPartition::FSPartition(IDisk &disk)
+    : disk(disk)
 {
-    this->disk = disk;
-    this->header = new PartitionHeader(*disk);
+    this->header = new PartitionHeader(disk);
     this->freeBlockManager = new SimpleFreeBlockManager(header);
-    this->inodeTable = new InodeTable(*disk, header);
+    this->inodeTable = new InodeTable(disk, header);
 }
 
 FSPartition::~FSPartition()
@@ -37,19 +37,25 @@ Inode *FSPartition::getInode(InodeId inodeId)
     return inodeTable->getInode(inodeId);
 }
 
+Inode *FSPartition::getFreeInode()
+{
+    return inodeTable->getFreeNode();
+}
+
+#include <cstdio>
 void FSPartition::writeDataBlock(BlockId blockNumber, char *buffer)
 {
-    disk->writeBlock(blockNumber, buffer);
+    disk.writeBlock(blockNumber, buffer);
 }
 
 void FSPartition::readDataBlock(BlockId blockNumber, char *buffer)
 {
-    disk->readBlock(blockNumber, buffer);
+    disk.readBlock(blockNumber, buffer);
 }
 
 void FSPartition::flushInodeTable()
 {
-    inodeTable->writeAllToDisk();
+    inodeTable->writeCachedToDisk();
 }
 
 BlockId FSPartition::getFirstDataBlock()

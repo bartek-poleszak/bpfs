@@ -84,6 +84,8 @@ void File::append(char *buffer, uint64_t significantBytes)
 BlockSize File::appendLastBlock(char *buffer, uint64_t significantBytes) {
     if (inode->getLastBlockByteCount() >= fsPartition->getBlockSize())
         return 0;
+    if (inode->getSizeInBlocks() == 0)
+        return 0;
 
     char lastBlock[fsPartition->getBlockSize()];
     readBlock(inode->getSizeInBlocks() - 1, lastBlock);
@@ -123,6 +125,16 @@ void File::get(std::ofstream &fileStream)
     readBlock(inode->getSizeInBlocks() - 1, buffer);
     fileStream.write(buffer, inode->getLastBlockByteCount());
 
+}
+
+Inode *File::getInode()
+{
+    return inode;
+}
+
+std::string &File::getName()
+{
+    return name;
 }
 
 

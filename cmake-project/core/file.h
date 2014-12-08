@@ -52,6 +52,8 @@ public:
     void append(char *buffer, uint64_t significantBytes);
     void write(std::ifstream &fileStream);
     void get(std::ofstream &fileStream);
+    Inode *getInode();
+    std::string &getName();
 };
 
 

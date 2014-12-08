@@ -32,12 +32,12 @@ void Inode::clear()
     lastBlockByteCount = 0;
 }
 
-void Inode::clearForDebug()
-{
-    sizeInBlocks = 0;
-    hardLinkCount = 0;
-    lastBlockByteCount = 0;
-}
+//void Inode::clearForDebug()
+//{
+//    sizeInBlocks = 0;
+//    hardLinkCount = 0;
+//    lastBlockByteCount = 0;
+//}
 
 void Inode::addLink()
 {

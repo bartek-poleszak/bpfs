@@ -32,9 +32,9 @@ private:
 
     unsigned getDataBlockOffset(unsigned blockNumber);
 
-    void clear();
 public:
-    static const InodeId INVALID_ID = 0;
+    static const InodeId ROOT_DIRECTORY_ID = 0;
+    static const InodeId INVALID_ID = ROOT_DIRECTORY_ID;
     static const InodeSize MIN_SIZE = 32;
     Inode(InodeSize size, FileType fileType, InodeId id);
     Inode(InodeSize size, char *buffer, unsigned indexInBlock, InodeId id);
@@ -49,7 +49,8 @@ public:
     BlockCount getSizeInBlocks();
     InodeId getId();
     Permissions *getPermissions();
-    void clearForDebug();
+//    void clearForDebug();
+    void clear();
     void addLink();
     void removeLink();
     uint8_t getHardLinkCount();

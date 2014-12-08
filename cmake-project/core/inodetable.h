@@ -28,7 +28,7 @@ public:
     InodeTable(IDisk &disk, InodeCount inodeCount, InodeSize inodeSize, BlockSize blockSize);
     InodeTable(IDisk &disk, PartitionHeader *header);
     ~InodeTable();
-    void writeAllToDisk();
+    void writeCachedToDisk();
     Inode *getInode(InodeId inodeId);
     BlockCount getSizeInBytes();
     void calculateSizeAndNodesPerBlock();

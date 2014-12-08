@@ -1,162 +1,122 @@
 #include <iostream>
-#include "filedisk.h"
-#include "idisk.h"
-#include "partitionheader.h"
-#include "rawdatautils.h"
-
-using namespace std;
-
-void testOk() {
-    cout << "\tOK" << endl;
-}
-
-void testFail() {
-    cout << "\tFAIL" << endl;
-}
-
-void test(bool testCase) {
-    if (testCase)
-        testOk();
-    else
-        testFail();
-}
-
-void testZapisuIOdczytuUintZBufora() {
-    cout << "testZapisuIOdczytuUintZBufora";
-
-    //given
-    char buffer[100] = {0};
-    unsigned value = 2349874399;
-    unsigned position = 89;
-    //when
-
-    RawDataUtils::writeUintToBuffer(value, buffer, position, sizeof(value));
-    unsigned resultValue = RawDataUtils::readUintFromBuffer(buffer, position, sizeof(resultValue));
-    //then
-    test(resultValue == value);
-}
-
-void deployTests() {
-    testZapisuIOdczytuUintZBufora();
-}
-
-#include "inode.h"
-#include "file.h"
 #include <fstream>
+#include "main.h"
 
-
-
-int mainw/*Write*/(int argc, char *argv[])
-{
-//    if (argc != 2) {
-//        throw "Zla liczba argumentow!";
-//    }
-//    FileDisk disk(argv[1], 1024);
-    FileDisk disk("/dev/sdb1", 1024);
-////    PartitionHeader header;
-////    header.writeToDisk(disk, 256);
-
-    PartitionHeader header(disk);
-    cout << "Block count: " << header.getBlockCount() << endl
-         << "Block size: " << header.getBlockSize() << endl
-         << "Inode size: " << header.getInodeSize() << endl
-         << "Inode count: " << header.getInodeCount() << endl;
-////    deployTests();
-
-    FSPartition partition(&disk);
-
-    Inode *inode = partition.getInode(0);
-    File file0("b", inode, &partition);
-
-    Inode *inode2 = partition.getInode(2);
-    File file2("a", inode2, &partition);
-
-    inode2->clearForDebug();
-    inode->clearForDebug();
-
-    cout << "Zapis0" << endl;
-//    char napis[100] = "To jest testowy napis!!!\n";
-    ifstream fileIn;
-    fileIn.open("/home/bp/fileIn");
-    file0.write(fileIn);
-    fileIn.close();
-//    file0.append(napis, 25);
-
-    cout << "Zapis1" << endl;
-    ifstream fileIn2;
-    fileIn2.open("/home/bp/fileIn2");
-    file2.write(fileIn2);
-    fileIn2.close();
-    partition.flushInodeTable();
-
-    cout << "Odczyt0" << endl;
-    ofstream plikOut;
-    plikOut.open("/home/bp/fileOut");
-    file0.get(plikOut);
-    plikOut.close();
-
-    cout << "Odczyt2" << endl;
-    ofstream plikOut2;
-    plikOut2.open("/home/bp/fileOut2");
-    file2.get(plikOut2);
-    plikOut.close();
-
-
-    /*FSPartition partition(&disk);
-    INode inode(256);
-    File file(&inode, &partition);
-
-    ifstream plikIn;
-    plikIn.open("/home/bp/fileIn");
-
-    ofstream plikOut;
-    plikOut.open("/home/bp/fileOut");
-
-    cout << "Zapis" << endl;
-    file.write(plikIn);
-    cout << "Odczyt" << endl;
-    file.get(plikOut);
-
-    plikIn.close();
-    plikOut.close();*/
-
-    return 0;
+int main(/*int argc, char *argv[]*/) {
+    int argc = 2;
+    const char *argv[argc];
+    argv[1] = "/dev/sdb1";
+    if (argc != 2)
+        throw "Zla liczba argumentow!";
+    deque<Directory *> directories;
+    ConsoleInterface console(directories);
+    console.main(argv[1]);
 }
 
-int main() {
-    FileDisk disk("/dev/sdb1", 1024);
-////    PartitionHeader header;
-////    header.writeToDisk(disk, 256);
 
-    PartitionHeader header(disk);
-    cout << "Block count: " << header.getBlockCount() << endl
-         << "Block size: " << header.getBlockSize() << endl
-         << "Inode size: " << header.getInodeSize() << endl
-         << "Inode count: " << header.getInodeCount() << endl;
-////    deployTests();
+ConsoleInterface::ConsoleInterface(deque<Directory *> &directories)
+    : directories(directories)
+{
 
-    FSPartition partition(&disk);
+}
 
-    Inode *inode = partition.getInode(2);
-    File file("b", inode, &partition);
+ConsoleInterface::~ConsoleInterface()
+{
+    if (partition != nullptr)
+        delete partition;
+}
 
-    char buffer[partition.getHeader()->getBlockSize()];
-
-    int bytesRead;
-    int sum = 0;
-    while ((bytesRead = file.read(buffer, 20)) > 0) {
-        sum += bytesRead;
-        for (int i = 0; i < bytesRead; ++i) {
-            cout << buffer[i];
-        }
-        cout << "bytesRead: " << bytesRead << " sum: " << sum << endl;
+void ConsoleInterface::initializeFilesystem(IDisk &disk)
+{
+    partition = commandResolver.loadFilesystem(disk);
+    if (partition != nullptr) {
+        directories.push_back(Directory::rootOf(partition));
     }
 }
 
-#include "fscreator.h"
-int mainn() {
-    FileDisk disk("/dev/sdb1", 1024);
-    FSCreator creator;
-    creator.createFilesystem(disk, 1024, 256, 4);
-    return 0;
+Directory *ConsoleInterface::currentDirectory()
+{
+    return directories.back();
+}
+
+void ConsoleInterface::unknownCommand()
+{
+    cout << "Unknown Command" << endl;
+}
+
+string ConsoleInterface::resolveFileName(string &fullPath) {
+    auto lastSlash = fullPath.find_last_of("/");
+    if (lastSlash == string::npos)
+        return fullPath;
+    return fullPath.substr(lastSlash + 1, fullPath.size());
+}
+
+void ConsoleInterface::put()
+{
+    string fileInPath, fileName;
+    cin >> fileInPath;
+    fileName = resolveFileName(fileInPath);
+
+    ifstream fileIn;
+    fileIn.open(fileInPath);
+    File file(fileName, partition->getFreeInode(), partition);
+    file.write(fileIn);
+    currentDirectory()->link(file);
+    partition->flushInodeTable();
+}
+
+void ConsoleInterface::list()
+{
+    auto files = directories.back()->getFileList();
+    for (File &file : files)
+        cout << file.getName() << " ";
+    cout << endl;
+}
+
+void ConsoleInterface::printFileToStdOut()
+{
+    string fileName;
+    cin >> fileName;
+    File file = currentDirectory()->getFile(fileName);
+    char buffer[partition->getBlockSize()];
+    BlockSize bytesRead;
+    while ((bytesRead = file.read(buffer, partition->getBlockSize())) > 0) {
+        for (unsigned i = 0; i < bytesRead; ++i) {
+            cout << buffer[i];
+        }
+    }
+}
+
+void ConsoleInterface::main(const char *diskPath)
+{
+    prompt.setDevicePath(diskPath);
+    string command;
+    FileDisk disk(diskPath, 1024);
+
+    while (true) {
+        cout << prompt.render(directories);
+        cin >> command;
+        if (command == Command::EXIT)
+            break;
+
+        if (partition == nullptr) {
+            if (command == Command::MAKE_FILESYSTEM)
+                commandResolver.makeFilesystem(disk);
+            else if (command == Command::INIT)
+                initializeFilesystem(disk);
+            else
+                unknownCommand();
+        }
+        else {
+            if (command == Command::PUT)
+                put();
+            else if (command == Command::LIST)
+                list();
+            else if (command == Command::CAT)
+                printFileToStdOut();
+            else
+                unknownCommand();
+        }
+    }
+
 }

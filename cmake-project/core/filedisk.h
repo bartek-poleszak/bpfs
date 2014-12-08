@@ -12,11 +12,11 @@ private:
 
 public:
     FileDisk(const char *filePath, BlockSize blockSize);
-    ~FileDisk();
-    void readBlock(BlockId blockNumber, char *buffer);
-    void writeBlock(BlockId blockNumber, char *buffer);
-    BlockSize getBlockSize();
-    BlockCount getBlockCount();
+    ~FileDisk() override;
+    void readBlock(BlockId blockNumber, char *buffer) override;
+    void writeBlock(BlockId blockNumber, char *buffer) override;
+    BlockSize getBlockSize() override;
+    BlockCount getBlockCount() override;
 };
 
 

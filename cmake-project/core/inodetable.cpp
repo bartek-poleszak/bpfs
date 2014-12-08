@@ -8,7 +8,7 @@ void InodeTable::calculateSizeAndNodesPerBlock()
 
 Inode *InodeTable::getFreeNode()
 {
-    for (int i = 0; i < inodeCount; ++i) {
+    for (unsigned i = 0; i < inodeCount; ++i) {
         if (getInode(i)->isFree())
             return getInode(i);
     }
@@ -30,6 +30,10 @@ InodeTable::InodeTable(IDisk &disk, InodeCount inodeCount, InodeSize inodeSize, 
     this->inodeSize = inodeSize;
     this->blockSize = blockSize;
     calculateSizeAndNodesPerBlock();
+    for (unsigned i = 0; i < inodeCount; ++i) {
+        cachedInodes[i] = getInode(i);
+        cachedInodes[i]->clear();
+    }
 }
 
 InodeTable::InodeTable(IDisk &disk, PartitionHeader *header)
@@ -60,7 +64,7 @@ void InodeTable::writeNodeToDisk(Inode *inode) {
     disk->writeBlock(whichBlock, buffer);
 }
 
-void InodeTable::writeAllToDisk()
+void InodeTable::writeCachedToDisk()
 {
     for (auto &idInodePair : cachedInodes)
         writeNodeToDisk(idInodePair.second);

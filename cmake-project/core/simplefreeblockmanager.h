@@ -10,9 +10,9 @@ private:
     BlockId nextFreeBlock;
 public:
     SimpleFreeBlockManager(PartitionHeader *header);
-    BlockId getFreeBlock();
-    BlockCount freeBlockCount();
-    bool isFull();
+    BlockId getFreeBlock() override;
+    BlockCount freeBlockCount() override;
+    bool isFull() override;
 };
 
 #endif // SIMPLEFREEBLOCKMANAGER_H

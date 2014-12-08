@@ -6,7 +6,7 @@
 
 class InvalidPermissionsException : public std::exception {};
 
-enum FileType {
+enum class FileType {
     REGULAR,
     DIRECTORY,
     NONE

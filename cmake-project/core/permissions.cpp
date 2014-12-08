@@ -20,7 +20,7 @@ FileType Permissions::getFileType()
 
 RawPermissions Permissions::getRawData()
 {
-    return fileType;
+    return static_cast<RawPermissions>(fileType);
 }
 
 unsigned Permissions::getRawDataSize()
