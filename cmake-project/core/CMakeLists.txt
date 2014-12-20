@@ -17,6 +17,7 @@ set(SRC_LIST
     permissions.cpp
     rawdatautils.cpp
     simplefreeblockmanager.cpp
+    log.cpp
 )
 
 add_definitions(

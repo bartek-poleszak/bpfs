@@ -10,6 +10,8 @@ public:
     virtual BlockId getFreeBlock() = 0;
     virtual BlockCount freeBlockCount() = 0;
     virtual bool isFull() = 0;
+    virtual void flush() = 0;
+    virtual void initialize() = 0;
 };
 
 #endif // IFILEMANAGER_H

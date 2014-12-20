@@ -19,16 +19,18 @@ private:
     File *file;
     BlockSize blockSize;
     int currentPositionInBuffer;
-    BlockCount currentBlock;
+    BlockCount nextBlock;
     int64_t currentBlockSize;
     char *innerBuffer;
     int nextByte();
     void loadNextBlock();
+    void loadBlock(BlockCount blockId);
 public:
     static const int END_OF_FILE = -1000;
     FileReadBuffer(File *file, BlockSize blockSize);
     ~FileReadBuffer();
-    uint64_t read(char *innerBuffer, uint64_t length);
+    uint64_t read(char *buffer, uint64_t length);
+    uint64_t read(char *buffer, uint64_t length, uint64_t offset);
 };
 
 
@@ -39,21 +41,28 @@ private:
     Inode *inode;
     FSPartition *fsPartition;
     void rewriteBlock(BlockCount index, char *buffer);
-    BlockSize appendLastBlock(char *buffer, uint64_t significantBytes);
+    BlockSize appendLastBlock(const char *buffer, uint64_t significantBytes);
     FileReadBuffer *fileReadBuffer;
 public:
     File(std::string name, Inode *inode, FSPartition *fsPartition);
+    File();
     ~File();
     uint64_t read(char *buffer, uint64_t length);
+    uint64_t read(char *buffer, uint64_t length, uint64_t offset);
     BlockSize readBlock(BlockCount index, char *buffer);
     void writeBlock(BlockCount index, char *buffer);
     bool isDirectory();
-    void appendByBlock(char *buffer, BlockSize significantBytes);
-    void append(char *buffer, uint64_t significantBytes);
+    void appendByBlock(const char *buffer, BlockSize significantBytes);
+    void append(const char *buffer, uint64_t significantBytes);
     void write(std::ifstream &fileStream);
+    uint64_t write(const char *buffer, uint64_t length, uint64_t offset);
     void get(std::ofstream &fileStream);
     Inode *getInode();
     std::string &getName();
+    uint64_t getTotalSizeInBytes();
+    void truncate(uint64_t size);
+    void appendWithZeroes(uint64_t size);
+    void cutToSize(uint64_t size);
 };
 
 

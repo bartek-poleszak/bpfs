@@ -34,6 +34,7 @@ private:
 
 public:
     static const InodeId ROOT_DIRECTORY_ID = 0;
+    static const InodeId BLOCK_MANAGER_FILE_ID = 1;
     static const InodeId INVALID_ID = ROOT_DIRECTORY_ID;
     static const InodeSize MIN_SIZE = 32;
     Inode(InodeSize size, FileType fileType, InodeId id);

@@ -15,7 +15,7 @@ void FileDisk::readBlock(BlockId blockNumber, char *buffer)
     readBlockDevice(&partition, blockNumber, buffer);
 }
 
-void FileDisk::writeBlock(BlockId blockNumber, char *buffer)
+void FileDisk::writeBlock(BlockId blockNumber, const char *buffer)
 {
     writeBlockDevice(&partition, blockNumber, buffer);
 }

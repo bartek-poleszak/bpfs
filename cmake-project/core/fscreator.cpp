@@ -2,6 +2,7 @@
 #include "partitionheader.h"
 #include "file.h"
 #include "rootdirectory.h"
+#include "log.h"
 
 FSCreator::FSCreator()
 {
@@ -16,6 +17,7 @@ void FSCreator::createFilesystem(IDisk &disk, BlockSize blockSize, InodeSize ino
     InodeTable table(disk, inodeCount, inodeSize, blockSize);
 
     FSPartition partition(disk);
+    partition.initialize();
     File rootDirectory("", table.getInode(Inode::ROOT_DIRECTORY_ID), &partition);
     rootDirectory.getInode()->addLink();
     table.writeCachedToDisk();

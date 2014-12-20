@@ -16,6 +16,7 @@ private:
     PartitionHeader *header;
     IFreeBlockManager *freeBlockManager;
     InodeTable *inodeTable;
+    void flushFreeBlockManager();
 public:
     static const int INODE_TABLE_BLOCK = 1;
 
@@ -26,10 +27,11 @@ public:
     BlockId getFreeBlock();
     Inode *getInode(InodeId inodeId);
     Inode *getFreeInode();
-    void writeDataBlock(BlockId blockNumber, char *buffer);
+    void writeDataBlock(BlockId blockNumber, const char *buffer);
     void readDataBlock(BlockId blockNumber, char *buffer);
     void flushInodeTable();
     BlockId getFirstDataBlock();
+    void initialize();
 };
 
 #endif // FSPARTITION_H

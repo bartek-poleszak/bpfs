@@ -21,6 +21,11 @@ void Directory::readEntryFromBuffer(char *buffer, uint8_t stringLength)
     entries[fileName] = inodeId;
 }
 
+File *Directory::getAsFile()
+{
+    return file;
+}
+
 Directory::Directory(File *file, FSPartition *partition)
 {
     this->partition = partition;
@@ -38,7 +43,6 @@ Directory::Directory(File *file, FSPartition *partition)
 
 Directory::~Directory()
 {
-
 }
 
 Inode *Directory::getInode(const string &fileName) {
@@ -92,18 +96,33 @@ void Directory::unlink(string &fileName)
 //    flush();
 }
 
-File Directory::getFile(string &fileName)
+File *Directory::getFile(string &fileName)
 {
-    Inode *inode = getInode(fileName);
-    return File(fileName, inode, partition);
+    if (fileCache[fileName].getInode() == nullptr) {
+        Inode *inode = getInode(fileName);
+        fileCache[fileName] = File(fileName, inode, partition);
+    }
+    return &fileCache[fileName];
 }
 
-vector<File> Directory::getFileList()
+bool Directory::fileExists(string &fileName) {
+    try {
+        getInode(fileName);
+        return true;
+    }
+    catch (FileDosentExistException e) {
+        return false;
+    }
+}
+
+vector<File *> Directory::getFileList()
 {
-    vector<File> result;
+    vector<File *> result;
     result.reserve(entries.size());
     for (auto &entry : entries) {
-        result.push_back(File(entry.first, getInode(entry.first), partition));
+        string fileName = entry.first;
+        if (fileExists(fileName))
+            result.push_back(getFile(fileName));
     }
     return result;
 }

@@ -14,7 +14,7 @@ typedef struct {
 BlockDevice openBlockDevice(const char *path, int blockSIze);
 void closeBlockDevice(BlockDevice *partition);
 void readBlockDevice(BlockDevice *partition, int blockNumber, char *buffer);
-void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer);
+void writeBlockDevice(BlockDevice *partition, int blockNumber, const char *buffer);
 unsigned long long blockCount(BlockDevice *partition);
 
 #ifdef __cplusplus

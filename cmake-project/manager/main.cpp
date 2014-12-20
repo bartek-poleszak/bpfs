@@ -68,8 +68,8 @@ void ConsoleInterface::put()
 void ConsoleInterface::list()
 {
     auto files = directories.back()->getFileList();
-    for (File &file : files)
-        cout << file.getName() << " ";
+    for (File *file : files)
+        cout << file->getName() << " ";
     cout << endl;
 }
 
@@ -77,10 +77,10 @@ void ConsoleInterface::printFileToStdOut()
 {
     string fileName;
     cin >> fileName;
-    File file = currentDirectory()->getFile(fileName);
+    File *file = currentDirectory()->getFile(fileName);
     char buffer[partition->getBlockSize()];
     BlockSize bytesRead;
-    while ((bytesRead = file.read(buffer, partition->getBlockSize())) > 0) {
+    while ((bytesRead = file->read(buffer, partition->getBlockSize())) > 0) {
         for (unsigned i = 0; i < bytesRead; ++i) {
             cout << buffer[i];
         }

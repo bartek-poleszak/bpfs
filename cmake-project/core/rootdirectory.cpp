@@ -7,5 +7,5 @@ RootDirectory::RootDirectory(File *file, FSPartition *partition)
 
 RootDirectory::~RootDirectory()
 {
-    delete file;
+    delete getAsFile();
 }

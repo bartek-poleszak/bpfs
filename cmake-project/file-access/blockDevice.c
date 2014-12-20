@@ -56,7 +56,7 @@ void readBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
 }
 
 
-void writeBlockDevice(BlockDevice *partition, int blockNumber, char *buffer)
+void writeBlockDevice(BlockDevice *partition, int blockNumber, const char *buffer)
 {
     seekToBlock(partition, blockNumber);
     int bytesWritten = write(partition->descriptor, buffer, partition->blockSize);
@@ -73,11 +73,11 @@ unsigned long long blockCount(BlockDevice *partition)
     seekToBlock(partition, 0);
 
     unsigned long long result = 0;
-    int bytesRead;
-    while ((bytesRead = read(partition->descriptor, buffer, partition->blockSize)) == partition->blockSize) {
-        result++;
-        printf("blockCount: %lld\n", result);
+    if ((result = lseek64(partition->descriptor, 0, SEEK_END)) < 0) {
+        perror("blockCount");
+        exit(1);
     }
-
+    result /= partition->blockSize;
+    printf("blockCount: %lld\n", result);
     return result;
 }
