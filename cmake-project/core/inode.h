@@ -4,10 +4,28 @@
 #include <exception>
 #include "permissions.h"
 #include "bpfstypes.h"
+#include "iindirectblock.h"
 
 class WrongINodeSizeException : public std::exception {};
-class MaximumFileSizeAchievedException : public std::exception {};
+class MaximumBlockCountInInodeException : public std::exception {};
+class PopDataBlockOnEmptyFileException : public std::exception {};
 class UnlinkOnFreeNodeException : public std::exception {};
+
+class InternalDataBlockCollection : public IIndirectBlock
+{
+private:
+    BlockId *dataBlocks;
+    BlockId nextIndirectBlock = INVALID_BLOCK_ID;
+    unsigned dataBlocksPerNode;
+public:
+    InternalDataBlockCollection(unsigned dataBlocksPerNode);
+    ~InternalDataBlockCollection();
+    BlockCount getMaxSize() override;
+    BlockId getBlockId(BlockCount position) override;
+    void setBlockId(BlockCount position, BlockId id) override;
+    BlockId getNextIndirectBlockId() override;
+    void setNextIndirectBlockId(BlockId id) override;
+};
 
 class Inode
 {
@@ -25,13 +43,10 @@ private:
     uint8_t hardLinkCount;
     BlockCount sizeInBlocks;
     BlockSize lastBlockByteCount;
-
-    BlockId *dataBlocks;
-    unsigned dataBlocksPerNode;
     InodeId id;
 
+    InternalDataBlockCollection dataBlockCollection;
     unsigned getDataBlockOffset(unsigned blockNumber);
-
 public:
     static const InodeId ROOT_DIRECTORY_ID = 0;
     static const InodeId BLOCK_MANAGER_FILE_ID = 1;
@@ -43,11 +58,10 @@ public:
     void readFromBuffer(char *buffer, unsigned inBufferOffset);
     void writeToBuffer(char *buffer, unsigned inBufferOffset);
 
-    void addDataBlock(BlockId blockNumber);
-    BlockId getDataBlockNumber(BlockCount sequenceNumber);
     BlockSize getLastBlockByteCount() const;
     void setLastBlockByteCount(const BlockSize &value);
     BlockCount getSizeInBlocks();
+    void setSizeInBlocks(BlockCount size);
     InodeId getId();
     Permissions *getPermissions();
 //    void clearForDebug();
@@ -56,6 +70,7 @@ public:
     void removeLink();
     uint8_t getHardLinkCount();
     bool isFree();
+    IIndirectBlock &getDataBlockCollection();
 };
 
 #endif // INODE_H

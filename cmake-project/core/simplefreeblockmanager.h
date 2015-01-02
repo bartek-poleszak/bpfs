@@ -18,6 +18,7 @@ public:
     bool isFull() override;
     void flush() override;
     void initialize() override;
+    void markBlockAsFree(BlockId id) override;
     inline void flushImpl();
 };
 

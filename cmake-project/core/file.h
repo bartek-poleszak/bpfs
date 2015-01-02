@@ -1,15 +1,18 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <inode.h>
 #include <fstream>
 #include <exception>
 #include <string>
+#include <vector>
+
+#include "inode.h"
 #include "fspartition.h"
 
 class BlockIndexOutOfRangeException : public std::exception {};
 class TooManyDataForBlockException : public std::exception {};
 class NoneDataForBlockException : public std::exception {};
+class FileCutException : public std::exception {};
 
 class File;
 
@@ -33,6 +36,24 @@ public:
     uint64_t read(char *buffer, uint64_t length, uint64_t offset);
 };
 
+class BlockIdCache {
+private:
+    FSPartition *partition;
+    Inode *inode;
+    std::vector<IIndirectBlock *> cache;
+    IIndirectBlock *getIndirectBlock(unsigned index);
+    void cacheBlocksTo(unsigned index);
+    bool isCached(unsigned index);
+    unsigned calculateIndex(BlockCount offset);
+    BlockCount calculatePosition(BlockCount offset);
+public:
+    BlockIdCache(FSPartition *partition, Inode *inode);
+    ~BlockIdCache();
+    BlockId getBlockId(BlockCount offset);
+    void addBlock(BlockId blockId);
+    void initializeNewIndirectBlock(BlockId blockId, IIndirectBlock *lastIndirectBlock);
+    void appendIndirectBlock(int lastBlockIdPosition, BlockId blockId, IIndirectBlock *lastIndirectBlock);
+};
 
 class File
 {
@@ -43,6 +64,8 @@ private:
     void rewriteBlock(BlockCount index, char *buffer);
     BlockSize appendLastBlock(const char *buffer, uint64_t significantBytes);
     FileReadBuffer *fileReadBuffer;
+    BlockIdCache *blockIdCache;
+    uint64_t cutFromLastBlock(uint64_t bytesToCut);
 public:
     File(std::string name, Inode *inode, FSPartition *fsPartition);
     File();
@@ -63,6 +86,7 @@ public:
     void truncate(uint64_t size);
     void appendWithZeroes(uint64_t size);
     void cutToSize(uint64_t size);
+    BlockSize cutByBlock();
 };
 
 

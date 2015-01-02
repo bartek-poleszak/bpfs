@@ -1,5 +1,6 @@
 #include "inode.h"
 #include "rawdatautils.h"
+#include "log.h"
 
 BlockSize Inode::getLastBlockByteCount() const
 {
@@ -14,6 +15,11 @@ void Inode::setLastBlockByteCount(const BlockSize &value)
 BlockCount Inode::getSizeInBlocks()
 {
     return sizeInBlocks;
+}
+
+void Inode::setSizeInBlocks(BlockCount size)
+{
+    this->sizeInBlocks = size;
 }
 
 InodeId Inode::getId() {
@@ -31,13 +37,6 @@ void Inode::clear()
     hardLinkCount = 0;
     lastBlockByteCount = 0;
 }
-
-//void Inode::clearForDebug()
-//{
-//    sizeInBlocks = 0;
-//    hardLinkCount = 0;
-//    lastBlockByteCount = 0;
-//}
 
 void Inode::addLink()
 {
@@ -62,6 +61,7 @@ bool Inode::isFree()
 }
 
 Inode::Inode(InodeSize size, FileType fileType, InodeId id)
+    : dataBlockCollection( ((size - FIRST_DATA_BLOCK_OFFSET) / BLOCK_ADRESS_SIZE) - 1 )
 {
 
     if (size < MIN_SIZE || (size % BLOCK_ADRESS_SIZE) != 0) {
@@ -70,8 +70,6 @@ Inode::Inode(InodeSize size, FileType fileType, InodeId id)
     this->id = id;
     permissions = new Permissions(fileType, 7, 7, 7);
     clear();
-    dataBlocksPerNode = (size - FIRST_DATA_BLOCK_OFFSET) / BLOCK_ADRESS_SIZE;
-    dataBlocks = new uint64_t[dataBlocksPerNode];
 }
 
 Inode::Inode(InodeSize size, char *buffer, unsigned indexInBlock, InodeId id)
@@ -83,7 +81,6 @@ Inode::Inode(InodeSize size, char *buffer, unsigned indexInBlock, InodeId id)
 Inode::~Inode()
 {
     delete permissions;
-    delete [] dataBlocks;
 }
 
 unsigned Inode::getDataBlockOffset(unsigned blockNumber)
@@ -91,18 +88,9 @@ unsigned Inode::getDataBlockOffset(unsigned blockNumber)
     return FIRST_DATA_BLOCK_OFFSET + blockNumber*BLOCK_ADRESS_SIZE;
 }
 
-void Inode::addDataBlock(BlockId blockNumber)
+IIndirectBlock &Inode::getDataBlockCollection()
 {
-    if (sizeInBlocks == dataBlocksPerNode) {
-        throw MaximumFileSizeAchievedException();
-    }
-    dataBlocks[sizeInBlocks] = blockNumber;
-    sizeInBlocks++;
-}
-
-BlockId Inode::getDataBlockNumber(BlockCount sequenceNumber)
-{
-    return dataBlocks[sequenceNumber];
+    return dataBlockCollection;
 }
 
 void Inode::readFromBuffer(char *buffer, unsigned inBufferOffset)
@@ -115,10 +103,15 @@ void Inode::readFromBuffer(char *buffer, unsigned inBufferOffset)
     sizeInBlocks = RawDataUtils::readUintFromBuffer(buffer, inBufferOffset + BLOCK_COUNT_OFFSET, sizeof(sizeInBlocks));
     lastBlockByteCount = RawDataUtils::readUintFromBuffer(buffer, inBufferOffset + LAST_BLOCK_BYTE_COUNT_OFFSET, sizeof(lastBlockByteCount));
 
-    for (unsigned i = 0; i < dataBlocksPerNode; ++i) {
+    unsigned i;
+    for (i = 0; i < dataBlockCollection.getMaxSize(); ++i) {
         unsigned offset = getDataBlockOffset(i);
-        dataBlocks[i] = RawDataUtils::readUintFromBuffer(buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
+        BlockId blockId = RawDataUtils::readUintFromBuffer(buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
+        dataBlockCollection.setBlockId(i, blockId);
     }
+    unsigned offset = getDataBlockOffset(i);
+    BlockId blockId = RawDataUtils::readUintFromBuffer(buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
+    dataBlockCollection.setNextIndirectBlockId(blockId);
 }
 
 void Inode::writeToBuffer(char *buffer, unsigned inBufferOffset)
@@ -129,8 +122,52 @@ void Inode::writeToBuffer(char *buffer, unsigned inBufferOffset)
     RawDataUtils::writeUintToBuffer(sizeInBlocks, buffer, inBufferOffset + BLOCK_COUNT_OFFSET, sizeof(sizeInBlocks));
     RawDataUtils::writeUintToBuffer(lastBlockByteCount, buffer, inBufferOffset + LAST_BLOCK_BYTE_COUNT_OFFSET, sizeof(lastBlockByteCount));
 
-    for (unsigned i = 0; i < dataBlocksPerNode; ++i) {
+    unsigned i;
+    for (i = 0; i < dataBlockCollection.getMaxSize(); ++i) {
         unsigned offset = getDataBlockOffset(i);
-        RawDataUtils::writeUintToBuffer(dataBlocks[i], buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
+        RawDataUtils::writeUintToBuffer(dataBlockCollection.getBlockId(i), buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
     }
+    unsigned offset = getDataBlockOffset(i);
+    RawDataUtils::writeUintToBuffer(dataBlockCollection.getNextIndirectBlockId(), buffer, inBufferOffset + offset, BLOCK_ADRESS_SIZE);
+}
+
+InternalDataBlockCollection::InternalDataBlockCollection(unsigned dataBlocksPerNode)
+{
+    this->dataBlocksPerNode = dataBlocksPerNode;
+    this->dataBlocks = new BlockId[dataBlocksPerNode];
+}
+
+InternalDataBlockCollection::~InternalDataBlockCollection()
+{
+    delete [] dataBlocks;
+}
+
+BlockCount InternalDataBlockCollection::getMaxSize()
+{
+    return dataBlocksPerNode;
+}
+
+BlockId InternalDataBlockCollection::getBlockId(BlockCount position)
+{
+    if (position >= dataBlocksPerNode)
+        throw MaximumBlockCountInInodeException();
+    Log::stream << "\tIn inode, position: " << position << " value: " << dataBlocks[position] << std::endl;
+    return dataBlocks[position];
+}
+
+void InternalDataBlockCollection::setBlockId(BlockCount position, BlockId id)
+{
+    if (position >= dataBlocksPerNode)
+        throw MaximumBlockCountInInodeException();
+    dataBlocks[position] = id;
+}
+
+BlockId InternalDataBlockCollection::getNextIndirectBlockId()
+{
+    return nextIndirectBlock;
+}
+
+void InternalDataBlockCollection::setNextIndirectBlockId(BlockId id)
+{
+    nextIndirectBlock = id;
 }

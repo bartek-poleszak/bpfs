@@ -15,6 +15,11 @@ void SimpleFreeBlockManager::initialize()
     flush();
 }
 
+void SimpleFreeBlockManager::markBlockAsFree(BlockId id)
+{
+    Log::stream << "Marking blocks as free unimplemented" << std::endl;
+}
+
 SimpleFreeBlockManager::SimpleFreeBlockManager(FSPartition *partition)
 {
     this->partition = partition;

@@ -72,6 +72,11 @@ void FSPartition::initialize()
     freeBlockManager->initialize();
 }
 
+void FSPartition::markBlockAsFree(BlockId id)
+{
+    freeBlockManager->markBlockAsFree(id);
+}
+
 void FSPartition::flushFreeBlockManager() {
     freeBlockManager->flush();
 }

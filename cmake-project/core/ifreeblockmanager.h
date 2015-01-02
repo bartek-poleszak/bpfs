@@ -12,6 +12,7 @@ public:
     virtual bool isFull() = 0;
     virtual void flush() = 0;
     virtual void initialize() = 0;
+    virtual void markBlockAsFree(BlockId id) = 0;
 };
 
 #endif // IFILEMANAGER_H

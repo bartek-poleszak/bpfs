@@ -1,4 +1,5 @@
 #include "filedisk.h"
+#include "log.h"
 
 FileDisk::FileDisk(const char *filePath, BlockSize blockSize)
 {
@@ -7,6 +8,7 @@ FileDisk::FileDisk(const char *filePath, BlockSize blockSize)
 
 FileDisk::~FileDisk()
 {
+    Log::stream << "FileDisk destructor" << std::endl;
     closeBlockDevice(&partition);
 }
 

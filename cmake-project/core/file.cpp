@@ -1,6 +1,9 @@
+#include <cstring>
 #include "file.h"
 #include "log.h"
-#include <cstring>
+#include "iindirectblock.h"
+#include "indirectblock.h"
+#include <cassert>
 
 File::File(std::string name, Inode *inode, FSPartition *fsPartition)
 {
@@ -8,6 +11,7 @@ File::File(std::string name, Inode *inode, FSPartition *fsPartition)
     this->inode = inode;
     this->fsPartition = fsPartition;
     this->fileReadBuffer = nullptr;
+    this->blockIdCache = new BlockIdCache(fsPartition, inode);
 }
 
 File::File()
@@ -16,12 +20,15 @@ File::File()
     this->inode = 0;
     this->fsPartition = nullptr;
     this->fileReadBuffer = nullptr;
+    this->blockIdCache = nullptr;
 }
 
 File::~File()
 {
     if (fileReadBuffer != nullptr)
         delete fileReadBuffer;
+//    if (blockIdCache != nullptr)
+//        delete blockIdCache;
 }
 
 uint64_t File::read(char *buffer, uint64_t length)
@@ -42,8 +49,7 @@ BlockSize File::readBlock(BlockCount index, char *buffer)
 {
     if (index >= inode->getSizeInBlocks())
         throw BlockIndexOutOfRangeException();
-    fsPartition->readDataBlock(inode->getDataBlockNumber(index), buffer);
-
+    fsPartition->readDataBlock(blockIdCache->getBlockId(index), buffer);
     if (index == inode->getSizeInBlocks() - 1)
         return inode->getLastBlockByteCount();
     return fsPartition->getBlockSize();
@@ -61,7 +67,7 @@ void File::rewriteBlock(BlockCount index, char *buffer)
 {
     if (index > inode->getSizeInBlocks())
         throw BlockIndexOutOfRangeException();
-    BlockId blockId = inode->getDataBlockNumber(index);
+    BlockId blockId = blockIdCache->getBlockId(index);
     fsPartition->writeDataBlock(blockId, buffer);
 }
 
@@ -72,8 +78,11 @@ void File::appendByBlock(const char *buffer, BlockSize significantBytes)
     if (significantBytes == 0)
         throw NoneDataForBlockException();
 
+//    IIndirectBlock *indirectBlock = blockIdCache->getIndirectBlock(0);
     BlockId newBlockId = fsPartition->getFreeBlock();
-    inode->addDataBlock(newBlockId);
+    blockIdCache->addBlock(newBlockId);
+//    indirectBlock->setBlockId(inode->getSizeInBlocks(), newBlockId);
+//    inode->setSizeInBlocks(inode->getSizeInBlocks() + 1);
     fsPartition->writeDataBlock(newBlockId, buffer);
     inode->setLastBlockByteCount(significantBytes);
 }
@@ -130,7 +139,8 @@ void File::write(std::ifstream &fileStream)
         appendByBlock(buffer, fsPartition->getBlockSize());
         fileStream.read(buffer, fsPartition->getBlockSize());
     }
-    appendByBlock(buffer, fileStream.gcount());
+    if (fileStream.gcount() > 0)
+        appendByBlock(buffer, fileStream.gcount());
 }
 
 uint64_t File::write(const char *buffer, uint64_t length, uint64_t offset)
@@ -184,9 +194,32 @@ void File::appendWithZeroes(uint64_t size)
     }
 }
 
-void File::cutToSize(uint64_t size)
+BlockSize File::cutByBlock()
 {
     throw NotImplementedYetException();
+    BlockSize result = inode->getLastBlockByteCount();
+    return result;
+}
+
+uint64_t File::cutFromLastBlock(uint64_t bytesToCut) {
+    if (bytesToCut < inode->getLastBlockByteCount()) {
+        inode->setLastBlockByteCount(inode->getLastBlockByteCount() - bytesToCut);
+        return 0;
+    }
+    bytesToCut -= cutByBlock();
+    return bytesToCut;
+}
+
+void File::cutToSize(uint64_t requestedSize)
+{
+    auto currentSize = getTotalSizeInBytes();
+    if (currentSize < requestedSize)
+        throw FileCutException();
+    uint64_t bytesToCut = currentSize - requestedSize;
+    bytesToCut = cutFromLastBlock(requestedSize);
+    while (bytesToCut > fsPartition->getBlockSize())
+        bytesToCut -= cutByBlock();
+    cutFromLastBlock(bytesToCut);
 }
 
 void File::truncate(uint64_t size)
@@ -265,4 +298,95 @@ void FileReadBuffer::loadNextBlock() {
     catch (BlockIndexOutOfRangeException e) {
         currentPositionInBuffer = END_OF_FILE;
     }
+}
+
+
+void BlockIdCache::cacheBlocksTo(unsigned index)
+{
+    while (!isCached(index)) {
+        IIndirectBlock *lastCached = cache.at(cache.size() - 1);
+        cache.push_back(new IndirectBlock(partition, lastCached->getNextIndirectBlockId()));
+    }
+}
+
+bool BlockIdCache::isCached(unsigned index)
+{
+    return cache.size() > index;
+}
+
+unsigned BlockIdCache::calculateIndex(BlockCount offset)
+{
+    IIndirectBlock *inodeInnerIndirectBlock = getIndirectBlock(0);
+    if (offset < inodeInnerIndirectBlock->getMaxSize())
+        return 0;
+    offset -= inodeInnerIndirectBlock->getMaxSize();
+    return 1 + (offset / IndirectBlock::getMaxSize(partition));
+}
+
+BlockCount BlockIdCache::calculatePosition(BlockCount offset)
+{
+    IIndirectBlock *inodeInnerIndirectBlock = getIndirectBlock(0);
+    if (offset < inodeInnerIndirectBlock->getMaxSize())
+        return offset;
+    offset -= inodeInnerIndirectBlock->getMaxSize();
+    return offset % IndirectBlock::getMaxSize(partition);
+}
+
+BlockIdCache::BlockIdCache(FSPartition *partition, Inode *inode)
+{
+    this->partition = partition;
+    this->inode = inode;
+    cache.push_back(&inode->getDataBlockCollection());
+}
+
+BlockIdCache::~BlockIdCache()
+{
+    // i = 1, bo nie usuwam wewnetrznego IndirectBlocku w i-wezle,
+    // robi to destruktor i-wezla
+    for (unsigned i = 1; i < cache.size(); i++)
+        delete cache[i];
+}
+
+BlockId BlockIdCache::getBlockId(BlockCount offset)
+{
+    assert(offset < inode->getSizeInBlocks());
+    auto index = calculateIndex(offset);
+    IIndirectBlock *indirectBlock = getIndirectBlock(index);
+    Log::stream << "getBlockId offset: " << offset << " indirectBlock index: " << index << std::endl;
+    return indirectBlock->getBlockId(calculatePosition(offset));
+}
+
+void BlockIdCache::initializeNewIndirectBlock(BlockId blockId, IIndirectBlock *lastIndirectBlock)
+{
+    BlockId newIndirectBlockId = partition->getFreeBlock();
+    Log::stream << "New indirect block: " << newIndirectBlockId << std::endl;
+    lastIndirectBlock->setNextIndirectBlockId(newIndirectBlockId);
+    lastIndirectBlock = getIndirectBlock(calculateIndex(inode->getSizeInBlocks()));
+    lastIndirectBlock->setBlockId(0, blockId);
+}
+
+void BlockIdCache::addBlock(BlockId blockId)
+{
+    IIndirectBlock *lastIndirectBlock;
+    int lastBlockIdPosition;
+    if (inode->getSizeInBlocks() > 0) {
+        lastIndirectBlock = getIndirectBlock(calculateIndex(inode->getSizeInBlocks()-1));
+        lastBlockIdPosition = calculatePosition(inode->getSizeInBlocks()-1);
+    }
+    else {
+        lastIndirectBlock = getIndirectBlock(0);
+        lastBlockIdPosition = -1;
+    }
+    if (lastBlockIdPosition != -1 && (unsigned)lastBlockIdPosition >= lastIndirectBlock->getMaxSize()-1)
+        initializeNewIndirectBlock(blockId, lastIndirectBlock);
+    else
+        lastIndirectBlock->setBlockId(calculatePosition(lastBlockIdPosition + 1), blockId);
+    inode->setSizeInBlocks(inode->getSizeInBlocks() + 1);
+}
+
+IIndirectBlock *BlockIdCache::getIndirectBlock(unsigned index)
+{
+    if (!isCached(index))
+        cacheBlocksTo(index);
+    return cache.at(index);
 }

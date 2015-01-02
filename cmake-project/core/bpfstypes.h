@@ -14,5 +14,7 @@ typedef uint32_t InodeCount;
 typedef uint32_t InodeId;
 typedef uint16_t RawPermissions;
 
+const BlockId INVALID_BLOCK_ID = 0;
+
 
 #endif // BPFSTYPES_H

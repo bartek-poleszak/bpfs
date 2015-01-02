@@ -18,6 +18,8 @@ set(SRC_LIST
     rawdatautils.cpp
     simplefreeblockmanager.cpp
     log.cpp
+    indirectblock.cpp
+    iindirectblock.cpp
 )
 
 add_definitions(

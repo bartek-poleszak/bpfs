@@ -32,6 +32,7 @@ public:
     void flushInodeTable();
     BlockId getFirstDataBlock();
     void initialize();
+    void markBlockAsFree(BlockId id);
 };
 
 #endif // FSPARTITION_H
