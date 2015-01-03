@@ -13,6 +13,7 @@ class Utils
 public:
     Utils();
     static string getFileNameFromPath(string &path);
+    static string getFileNameFromPath(const char *path);
 };
 
 #endif // UTILS_H

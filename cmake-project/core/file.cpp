@@ -188,6 +188,8 @@ std::string &File::getName()
 
 uint64_t File::getTotalSizeInBytes()
 {
+    if (inode->getSizeInBlocks() == 0)
+        return 0;
     uint64_t fullBlocksSize = (inode->getSizeInBlocks()-1) * fsPartition->getBlockSize();
     return fullBlocksSize + inode->getLastBlockByteCount();
 }

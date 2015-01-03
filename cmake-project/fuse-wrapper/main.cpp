@@ -62,7 +62,20 @@ int getattr (const char *path, struct stat *buffer) {
 }
 
 int readlink (const char *path, char *buffer, size_t bufferSize) { return 1; }
-int mknod (const char *path, mode_t mode, dev_t dev) { return 1; }
+
+int mknod (const char *path, mode_t mode, dev_t dev)
+{
+    if ( !((mode & S_IFREG) == S_IFREG) )
+        return -EPERM;
+
+    Inode *newInode = partition->getFreeInode();
+    newInode->clear();
+    string fileName = Utils::getFileNameFromPath(path);
+    rootDirectory->link(fileName, newInode);
+
+    return 0;
+}
+
 int mkdir (const char *path, mode_t mode) { return 1; }
 int unlink (const char *path) { return 1; }
 int rmdir (const char *path) { return 1; }
@@ -204,6 +217,7 @@ int main(int argc, char *argv[]) {
     bpfsOperations.write = bpfs::write;
     bpfsOperations.init = bpfs::init;
     bpfsOperations.destroy = bpfs::destroy;
+    bpfsOperations.mknod = bpfs::mknod;
 ////    bpfsOperations.access = bpfs::access;
     fuse_main(argc, argv, &bpfsOperations, nullptr);
     return 0;
