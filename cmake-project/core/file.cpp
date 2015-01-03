@@ -322,7 +322,7 @@ void BlockIdCache::cacheBlocksTo(unsigned index)
 
 bool BlockIdCache::isCached(unsigned index)
 {
-    return cache.size() > index;
+    return index < cache.size();
 }
 
 unsigned BlockIdCache::calculateIndex(BlockCount offset)
@@ -336,6 +336,7 @@ unsigned BlockIdCache::calculateIndex(BlockCount offset)
 
 BlockCount BlockIdCache::calculatePosition(BlockCount offset)
 {
+    Log::stream << "calculate position offset: " << offset << std::endl;
     IIndirectBlock *inodeInnerIndirectBlock = getIndirectBlock(0);
     if (offset < inodeInnerIndirectBlock->getMaxSize())
         return offset;
@@ -391,7 +392,7 @@ void BlockIdCache::addBlock(BlockId blockId)
     if (lastBlockIdPosition != -1 && (unsigned)lastBlockIdPosition >= lastIndirectBlock->getMaxSize()-1)
         initializeNewIndirectBlock(blockId, lastIndirectBlock);
     else
-        lastIndirectBlock->setBlockId(calculatePosition(lastBlockIdPosition + 1), blockId);
+        lastIndirectBlock->setBlockId(lastBlockIdPosition + 1, blockId);
     inode->setSizeInBlocks(inode->getSizeInBlocks() + 1);
 }
 

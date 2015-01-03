@@ -24,8 +24,6 @@ BlockCount IndirectBlock::getMaxSize()
 
 unsigned long long IndirectBlock::getBlockIdWithoutException(BlockCount position)
 {
-    if (position >= getMaxSize())
-        throw PositionBiggerThanMaxSizeException();
     auto result = RawDataUtils::readUintFromBuffer(innerBuffer, position * sizeof(BlockId), sizeof(BlockId));
     Log::stream << "\tIndirectBlock " << blockId << ", position: " << position << " value: " << result << std::endl;
     return result;
@@ -45,6 +43,7 @@ void IndirectBlock::setBlockIdWithoutException(BlockId id, BlockCount position)
 
 void IndirectBlock::setBlockId(BlockCount position, BlockId id)
 {
+    Log::stream << "Setting block id: " << id << " on position " << position << "in indirect block no " << blockId << std::endl;
     setBlockIdWithoutException(id, position);
 }
 
