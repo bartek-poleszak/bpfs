@@ -87,6 +87,7 @@ public:
     void appendWithZeroes(uint64_t size);
     void cutToSize(uint64_t size);
     BlockSize cutByBlock();
+    void initializeBlockIdCacheIfNeeded();
 };
 
 

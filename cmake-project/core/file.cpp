@@ -11,13 +11,13 @@ File::File(std::string name, Inode *inode, FSPartition *fsPartition)
     this->inode = inode;
     this->fsPartition = fsPartition;
     this->fileReadBuffer = nullptr;
-    this->blockIdCache = new BlockIdCache(fsPartition, inode);
+    this->blockIdCache = nullptr;
 }
 
 File::File()
 {
     this->name = "";
-    this->inode = 0;
+    this->inode = nullptr;
     this->fsPartition = nullptr;
     this->fileReadBuffer = nullptr;
     this->blockIdCache = nullptr;
@@ -27,8 +27,8 @@ File::~File()
 {
     if (fileReadBuffer != nullptr)
         delete fileReadBuffer;
-//    if (blockIdCache != nullptr)
-//        delete blockIdCache;
+    if (blockIdCache != nullptr)
+        delete blockIdCache;
 }
 
 uint64_t File::read(char *buffer, uint64_t length)
@@ -45,10 +45,17 @@ uint64_t File::read(char *buffer, uint64_t length, uint64_t offset)
     return fileReadBuffer->read(buffer, length, offset);
 }
 
+void File::initializeBlockIdCacheIfNeeded()
+{
+    if (blockIdCache == nullptr)
+        blockIdCache = new BlockIdCache(fsPartition, inode);
+}
+
 BlockSize File::readBlock(BlockCount index, char *buffer)
 {
     if (index >= inode->getSizeInBlocks())
         throw BlockIndexOutOfRangeException();
+    initializeBlockIdCacheIfNeeded();
     fsPartition->readDataBlock(blockIdCache->getBlockId(index), buffer);
     if (index == inode->getSizeInBlocks() - 1)
         return inode->getLastBlockByteCount();
@@ -67,6 +74,7 @@ void File::rewriteBlock(BlockCount index, char *buffer)
 {
     if (index > inode->getSizeInBlocks())
         throw BlockIndexOutOfRangeException();
+    initializeBlockIdCacheIfNeeded();
     BlockId blockId = blockIdCache->getBlockId(index);
     fsPartition->writeDataBlock(blockId, buffer);
 }
@@ -80,6 +88,7 @@ void File::appendByBlock(const char *buffer, BlockSize significantBytes)
 
 //    IIndirectBlock *indirectBlock = blockIdCache->getIndirectBlock(0);
     BlockId newBlockId = fsPartition->getFreeBlock();
+    initializeBlockIdCacheIfNeeded();
     blockIdCache->addBlock(newBlockId);
 //    indirectBlock->setBlockId(inode->getSizeInBlocks(), newBlockId);
 //    inode->setSizeInBlocks(inode->getSizeInBlocks() + 1);

@@ -159,10 +159,11 @@ void *init (struct fuse_conn_info *conn)
 void destroy (void *userData)
 {
     logStream << "destroy" << endl;
-    if (partition != nullptr)
-        delete partition;
+
     if (rootDirectory != nullptr)
         delete rootDirectory;
+    if (partition != nullptr)
+        delete partition;
     if (disk != nullptr)
         delete disk;
 }

@@ -63,7 +63,7 @@ bool Inode::isFree()
 Inode::Inode(InodeSize size, FileType fileType, InodeId id)
     : dataBlockCollection( ((size - FIRST_DATA_BLOCK_OFFSET) / BLOCK_ADRESS_SIZE) - 1 )
 {
-
+    Log::stream << "Inode constructor, id: " << id << std::endl;
     if (size < MIN_SIZE || (size % BLOCK_ADRESS_SIZE) != 0) {
         throw WrongINodeSizeException();
     }

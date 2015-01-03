@@ -7,11 +7,13 @@ IndirectBlock::IndirectBlock(FSPartition *partition, BlockId blockId)
     this->blockId = blockId;
     this->partition = partition;
     this->innerBuffer = new char[partition->getBlockSize()];
+    partition->readDataBlock(blockId, innerBuffer);
 }
 
 IndirectBlock::~IndirectBlock()
 {
     partition->writeDataBlock(blockId, innerBuffer);
+    Log::stream << "IndirectBlock destructor, writing block " << blockId << std::endl;
     delete [] innerBuffer;
 }
 
