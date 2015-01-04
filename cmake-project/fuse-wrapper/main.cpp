@@ -8,15 +8,17 @@
 #include "directory.h"
 #include "filedisk.h"
 #include "utils.h"
+#include "diskmatrix.h"
 
 using namespace std;
 
 namespace bpfs {
 
-FileDisk *disk;
+IDisk *disk;
 FSPartition *partition;
 Directory *rootDirectory;
 ostream &logStream = cout;
+string devicePath;
 
 File *getFileFromPath(const char *path)
 {
@@ -163,7 +165,6 @@ int fsyncdir (const char *path, int datasync, struct fuse_file_info *fileInfo) {
 
 void *init (struct fuse_conn_info *conn)
 {
-    disk = new FileDisk("/dev/sdb1", 1024);
     partition = new FSPartition(*disk);
     rootDirectory = Directory::rootOf(partition);
     return nullptr;
@@ -205,7 +206,51 @@ int fallocate (const char *path, int mode, off_t offset, off_t length,
 
 }
 
+void showUsageNote(char *execName) {
+    cout << "Usage:\n"
+         << execName << " /dev/<device> <mountpoint>" << endl
+         << execName << " matrix /dev/<device0> /dev/<device1> ... /dev/<devicen> <mountpoint>" << endl;
+    exit(EXIT_FAILURE);
+}
+
+void validateDeviceName(char *argv[]) {
+    if (strncmp("/dev/", argv[1], 5))
+        showUsageNote(argv[0]);
+}
+
+void initializeMatrix(int deviceCount, char *devicePaths[]) {
+    vector<string> paths;
+    for(int i = 0; i < deviceCount; i++)
+        paths.push_back(string(devicePaths[i]));
+    bpfs::disk = new DiskMatrix(paths, 1024);
+}
+
+void initializeFileDisk(char *path) {
+    bpfs::disk = new FileDisk(path, 1024);
+}
+
 int main(int argc, char *argv[]) {
+    if (argc < 3)
+        showUsageNote(argv[0]);
+    if (strcmp("matrix", argv[1]) == 0)
+        initializeMatrix(argc - 3, argv + 2);
+    else {
+        validateDeviceName(argv);
+        initializeFileDisk(argv[1]);
+    }
+    bpfs::devicePath = argv[1];
+
+    char debugFlag[3] = "-d";
+    char singleThreadFlag[3] = "-s";
+
+    int fuseArgc = 4;
+    char *fuseArgv[fuseArgc + 1];
+    fuseArgv[0] = argv[0];
+    fuseArgv[1] = argv[argc - 1];
+    fuseArgv[2] = debugFlag;
+    fuseArgv[3] = singleThreadFlag;
+    fuseArgv[fuseArgc] = 0;
+
     fuse_operations bpfsOperations;
     memset(&bpfsOperations, 0, sizeof(struct fuse_operations));
     bpfsOperations.getattr = bpfs::getattr;
@@ -219,6 +264,6 @@ int main(int argc, char *argv[]) {
     bpfsOperations.destroy = bpfs::destroy;
     bpfsOperations.mknod = bpfs::mknod;
 ////    bpfsOperations.access = bpfs::access;
-    fuse_main(argc, argv, &bpfsOperations, nullptr);
+    fuse_main(fuseArgc, fuseArgv, &bpfsOperations, nullptr);
     return 0;
 }

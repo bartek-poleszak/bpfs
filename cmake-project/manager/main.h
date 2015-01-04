@@ -28,6 +28,7 @@ public:
     void initializeFilesystem(IDisk &disk);
     Directory *currentDirectory();
     void unknownCommand();
+    void makeMatrix(const char *diskPath);
 };
 
 #endif // MAIN_H

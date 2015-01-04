@@ -20,6 +20,7 @@ set(SRC_LIST
     log.cpp
     indirectblock.cpp
     iindirectblock.cpp
+    diskmatrix.cpp
 )
 
 add_definitions(

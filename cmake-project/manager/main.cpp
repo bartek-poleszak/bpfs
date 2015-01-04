@@ -1,13 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <exception>
 #include "main.h"
+#include "diskmatrix.h"
 
-int main(/*int argc, char *argv[]*/) {
-    int argc = 2;
-    const char *argv[argc];
-    argv[1] = "/dev/sdb1";
+class TooFewArgumentsException : public std::exception {};
+
+int main(int argc, char *argv[]) {
     if (argc != 2)
-        throw "Zla liczba argumentow!";
+        throw TooFewArgumentsException();
     deque<Directory *> directories;
     ConsoleInterface console(directories);
     console.main(argv[1]);
@@ -87,11 +88,33 @@ void ConsoleInterface::printFileToStdOut()
     }
 }
 
+void ConsoleInterface::makeMatrix(const char *diskPath)
+{
+    vector<string> paths;
+    int matrixSize;
+    cout << "Matrix size: ";
+    cin >> matrixSize;
+    if (matrixSize < 2) {
+        cout << "Matrix must contain at least 2 devices" << endl;
+    }
+    else {
+        paths.push_back(diskPath);
+        cout << "Device 0: " << diskPath << endl;
+        string path;
+        for (int i = 1; i < matrixSize; i++) {
+            cout << "Device " << i << ": ";
+            cin >> path;
+            paths.push_back(path);
+        }
+        DiskMatrix diskMatrix(paths, 1024);
+        commandResolver.makeFilesystem(diskMatrix);
+    }
+}
+
 void ConsoleInterface::main(const char *diskPath)
 {
     prompt.setDevicePath(diskPath);
     string command;
-    FileDisk disk(diskPath, 1024);
 
     while (true) {
         cout << prompt.render(directories);
@@ -99,24 +122,16 @@ void ConsoleInterface::main(const char *diskPath)
         if (command == Command::EXIT)
             break;
 
-        if (partition == nullptr) {
-            if (command == Command::MAKE_FILESYSTEM)
-                commandResolver.makeFilesystem(disk);
-            else if (command == Command::INIT)
-                initializeFilesystem(disk);
-            else
-                unknownCommand();
+        if (command == Command::MAKE_FILESYSTEM) {
+            FileDisk disk(diskPath, 1024);
+            commandResolver.makeFilesystem(disk);
         }
-        else {
-            if (command == Command::PUT)
-                put();
-            else if (command == Command::LIST)
-                list();
-            else if (command == Command::CAT)
-                printFileToStdOut();
-            else
-                unknownCommand();
+        else if (command == Command::MAKE_MATRIX) {
+            makeMatrix(diskPath);
         }
+        else
+            unknownCommand();
+
     }
 
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.2.2, 2015-01-04T00:18:59. -->
+<!-- Written by QtCreator 3.2.2, 2015-01-04T11:16:25. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -257,7 +257,7 @@
      <value type="int">14</value>
     </valuelist>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguation.Title">fuse-wrapper</value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">/tmp/test -d -s</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">/dev/sdb1 /tmp/test</value>
     <value type="bool" key="CMakeProjectManager.CMakeRunConfiguration.UseTerminal">true</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory"></value>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
