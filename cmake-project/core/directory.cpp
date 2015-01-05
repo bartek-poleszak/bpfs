@@ -1,6 +1,7 @@
 #include "directory.h"
 #include "rawdatautils.h"
 #include "rootdirectory.h"
+#include "log.h"
 
 //void Directory::flush()
 //{
@@ -43,6 +44,11 @@ Directory::Directory(File *file, FSPartition *partition)
 
 Directory::~Directory()
 {
+}
+
+void Directory::flush()
+{
+    Log::stream << "Directory flush not implemented" << std::endl;
 }
 
 Inode *Directory::getInode(const string &fileName) {
@@ -89,11 +95,10 @@ Directory *Directory::rootOf(FSPartition *partition)
 
 void Directory::unlink(string &fileName)
 {
-    throw NotImplementedYetException();
-//    Inode *inode = getInode(fileName);
-//    entries.erase(fileName);
-//    inode->removeLink();
-//    flush();
+    File *file = getFile(fileName);
+    file->unlink();
+    entries.erase(fileName);
+    flush();
 }
 
 File *Directory::getFile(string &fileName)

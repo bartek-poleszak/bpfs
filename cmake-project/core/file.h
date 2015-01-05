@@ -66,6 +66,7 @@ private:
     FileReadBuffer *fileReadBuffer;
     BlockIdCache *blockIdCache;
     uint64_t cutFromLastBlock(uint64_t bytesToCut);
+    void markBlocksAsFree();
 public:
     File(std::string name, Inode *inode, FSPartition *fsPartition);
     File();
@@ -88,6 +89,7 @@ public:
     void cutToSize(uint64_t size);
     BlockSize cutByBlock();
     void initializeBlockIdCacheIfNeeded();
+    void unlink();
 };
 
 

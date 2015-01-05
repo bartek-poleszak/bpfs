@@ -38,7 +38,9 @@ BlockId ListFreeBlockManager::getFreeBlock()
         reloadCurrentIndirectBlock();
         return result;
     }
-    return currentIndirectBlock->getBlockId(controlBlock.nextFreeBlockPosition++);
+    auto result = currentIndirectBlock->getBlockId(controlBlock.nextFreeBlockPosition++);
+    Log::stream << "Free block requested, recieved: " << result << std::endl;
+    return result;
 }
 
 BlockCount ListFreeBlockManager::freeBlockCount()
@@ -84,7 +86,27 @@ BlockCount ListFreeBlockManager::calculateAvailableBlocks(BlockId firstAvailable
 
 void ListFreeBlockManager::markBlockAsFree(BlockId id)
 {
-    throw NotImplementedYetException();
+    controlBlock.freeBlockCount++;
+    Log::stream << "Block marked as free: " << id << std::endl;
+    if (controlBlock.nextFreeBlockPosition == 0)
+        initializeNewListBlock(id);
+    else
+        addToCurrentListBlock(id);
+}
+
+void ListFreeBlockManager::initializeNewListBlock(BlockId id)
+{
+    auto nextIndirectBlockId = controlBlock.currentIndirectBlockId;
+    controlBlock.nextFreeBlockPosition = IndirectBlock::getMaxSize(partition);
+    controlBlock.currentIndirectBlockId = id;
+    reloadCurrentIndirectBlock();
+    currentIndirectBlock->setNextIndirectBlockId(nextIndirectBlockId);
+}
+
+void ListFreeBlockManager::addToCurrentListBlock(BlockId id)
+{
+    controlBlock.nextFreeBlockPosition--;
+    currentIndirectBlock->setBlockId(controlBlock.nextFreeBlockPosition, id);
 }
 
 void ListFreeBlockManager::createList(BlockId inclusiveFrom)

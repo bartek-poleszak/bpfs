@@ -51,6 +51,21 @@ void File::initializeBlockIdCacheIfNeeded()
         blockIdCache = new BlockIdCache(fsPartition, inode);
 }
 
+void File::unlink()
+{
+    assert(inode->getHardLinkCount() != 0);
+    inode->removeLink();
+    if (inode->getHardLinkCount() == 0)
+        markBlocksAsFree();
+}
+
+void File::markBlocksAsFree()
+{
+    initializeBlockIdCacheIfNeeded();
+    for (BlockCount i = 0; i < inode->getSizeInBlocks(); i++)
+        fsPartition->markBlockAsFree(blockIdCache->getBlockId(i));
+}
+
 BlockSize File::readBlock(BlockCount index, char *buffer)
 {
     if (index >= inode->getSizeInBlocks())

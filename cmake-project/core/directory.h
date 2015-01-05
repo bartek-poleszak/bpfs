@@ -19,9 +19,9 @@ private:
     FSPartition *partition;
     map<string, InodeId> entries;
     map<string, File> fileCache;
-//    void flush();
-    Inode *getInode(const string &fileName);
     File *file;
+    void flush();
+    Inode *getInode(const string &fileName);
     unsigned createRawEntry(char *buffer, string &fileName);
     static const unsigned ENTRY_LENGTH_OFFSET = 0;
     static const unsigned INODE_ID_OFFSET = 1;

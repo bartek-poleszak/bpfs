@@ -28,6 +28,8 @@ private:
     void createList(BlockId inclusiveFrom);
     void initializeControlBlock(BlockId firstAvailableBlock);
     void reloadCurrentIndirectBlock();
+    void initializeNewListBlock(BlockId id);
+    void addToCurrentListBlock(BlockId id);
 public:
     ListFreeBlockManager(FSPartition *partition);
     ~ListFreeBlockManager() override;

@@ -79,7 +79,20 @@ int mknod (const char *path, mode_t mode, dev_t dev)
 }
 
 int mkdir (const char *path, mode_t mode) { return 1; }
-int unlink (const char *path) { return 1; }
+
+int unlink (const char *path)
+{
+    string fileName = Utils::getFileNameFromPath(path);
+    try {
+        rootDirectory->unlink(fileName);
+    }
+    catch (FileDosentExistException e) {
+        return -ENOENT;
+    }
+
+    return 0;
+}
+
 int rmdir (const char *path) { return 1; }
 int symlink (const char *oldPath, const char *newPath) { return 1; }
 int rename (const char *oldPath, const char *newPath) { return 1; }
@@ -263,6 +276,7 @@ int main(int argc, char *argv[]) {
     bpfsOperations.init = bpfs::init;
     bpfsOperations.destroy = bpfs::destroy;
     bpfsOperations.mknod = bpfs::mknod;
+    bpfsOperations.unlink = bpfs::unlink;
 ////    bpfsOperations.access = bpfs::access;
     fuse_main(fuseArgc, fuseArgv, &bpfsOperations, nullptr);
     return 0;
