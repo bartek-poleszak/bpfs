@@ -10,10 +10,15 @@ IndirectBlock::IndirectBlock(FSPartition *partition, BlockId blockId)
     partition->readDataBlock(blockId, innerBuffer);
 }
 
-IndirectBlock::~IndirectBlock()
+void IndirectBlock::flushImpl()
 {
     partition->writeDataBlock(blockId, innerBuffer);
-    Log::stream << "IndirectBlock destructor, writing block " << blockId << std::endl;
+    Log::stream << "IndirectBlock flush, writing block " << blockId << std::endl;
+}
+
+IndirectBlock::~IndirectBlock()
+{
+    flushImpl();
     delete [] innerBuffer;
 }
 
@@ -38,12 +43,14 @@ BlockId IndirectBlock::getBlockId(BlockCount position)
 
 void IndirectBlock::setBlockIdWithoutException(BlockId id, BlockCount position)
 {
+    Log::stream << "Setting block id: " << id << " on position " << position << "in indirect block no " << blockId << std::endl;
     RawDataUtils::writeUintToBuffer(id, innerBuffer, position * sizeof(BlockId), sizeof(BlockId));
 }
 
 void IndirectBlock::setBlockId(BlockCount position, BlockId id)
 {
-    Log::stream << "Setting block id: " << id << " on position " << position << "in indirect block no " << blockId << std::endl;
+    if (position >= getMaxSize())
+        throw PositionBiggerThanMaxSizeException();
     setBlockIdWithoutException(id, position);
 }
 

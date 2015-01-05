@@ -1,14 +1,15 @@
 #include "fspartition.h"
-#include "simplefreeblockmanager.h"
 #include "partitionheader.h"
 #include "log.h"
+#include "listfreeblockmanager.h"
 
 FSPartition::FSPartition(IDisk &disk)
     : disk(disk)
 {
     this->header = new PartitionHeader(disk);
     this->inodeTable = new InodeTable(disk, header);
-    this->freeBlockManager = new SimpleFreeBlockManager(this);
+//    this->freeBlockManager = new SimpleFreeBlockManager(this);
+    this->freeBlockManager = new ListFreeBlockManager(this);
 }
 
 FSPartition::~FSPartition()
@@ -67,9 +68,9 @@ BlockId FSPartition::getFirstDataBlock()
     return INODE_TABLE_BLOCK + inodeTable->getSizeInBytes();
 }
 
-void FSPartition::initialize()
+void FSPartition::onPartitionCreation()
 {
-    freeBlockManager->initialize();
+    freeBlockManager->onPartitionCreation();
 }
 
 void FSPartition::markBlockAsFree(BlockId id)

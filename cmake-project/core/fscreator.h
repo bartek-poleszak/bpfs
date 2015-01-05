@@ -9,6 +9,7 @@ class FSCreator
 public:
     FSCreator();
     void createFilesystem(IDisk &partition, BlockSize blockSize, InodeSize inodeSize, InodeCount inodeCount);
+    InodeTable * initializeInodeTable(BlockSize blockSize, InodeSize inodeSize, InodeCount inodeCount, IDisk &disk);
 };
 
 #endif // FSCREATOR_H

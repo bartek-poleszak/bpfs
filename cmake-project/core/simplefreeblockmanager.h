@@ -17,7 +17,7 @@ public:
     BlockCount freeBlockCount() override;
     bool isFull() override;
     void flush() override;
-    void initialize() override;
+    void onPartitionCreation() override;
     void markBlockAsFree(BlockId id) override;
     inline void flushImpl();
 };

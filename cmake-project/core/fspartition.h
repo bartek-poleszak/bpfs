@@ -31,7 +31,7 @@ public:
     void readDataBlock(BlockId blockNumber, char *buffer);
     void flushInodeTable();
     BlockId getFirstDataBlock();
-    void initialize();
+    void onPartitionCreation();
     void markBlockAsFree(BlockId id);
 };
 

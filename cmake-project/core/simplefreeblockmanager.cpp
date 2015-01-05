@@ -8,9 +8,9 @@ void SimpleFreeBlockManager::flush()
     partition->writeDataBlock(FIRST_FREE_BLOCK, rawData);
 }
 
-void SimpleFreeBlockManager::initialize()
+void SimpleFreeBlockManager::onPartitionCreation()
 {
-    nextFreeBlock = FIRST_FREE_BLOCK;
+    nextFreeBlock = partition->getFirstDataBlock();
     nextFreeBlock++;
     flush();
 }

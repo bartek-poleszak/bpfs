@@ -151,7 +151,7 @@ BlockId InternalDataBlockCollection::getBlockId(BlockCount position)
 {
     if (position >= dataBlocksPerNode)
         throw MaximumBlockCountInInodeException();
-    Log::stream << "\tIn inode, position: " << position << " value: " << dataBlocks[position] << std::endl;
+//    Log::stream << "\tIn inode, position: " << position << " value: " << dataBlocks[position] << std::endl;
     return dataBlocks[position];
 }
 

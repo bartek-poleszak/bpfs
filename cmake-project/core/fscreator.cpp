@@ -17,7 +17,7 @@ void FSCreator::createFilesystem(IDisk &disk, BlockSize blockSize, InodeSize ino
     InodeTable table(disk, inodeCount, inodeSize, blockSize);
 
     FSPartition partition(disk);
-    partition.initialize();
+    partition.onPartitionCreation();
     File rootDirectory("", table.getInode(Inode::ROOT_DIRECTORY_ID), &partition);
     rootDirectory.getInode()->addLink();
     table.writeCachedToDisk();

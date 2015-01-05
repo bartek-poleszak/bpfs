@@ -25,6 +25,7 @@ public:
     void setNextIndirectBlockId(BlockId id) override;
     static BlockCount getMaxSize(FSPartition *partition);
 
+    void flushImpl();
 };
 
 #endif // INDIRECTBLOCK_H

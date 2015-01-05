@@ -33,6 +33,7 @@ public:
     BlockCount getSizeInBytes();
     void calculateSizeAndNodesPerBlock();
     Inode *getFreeNode();
+    void onPartitionCreation();
 };
 
 #endif // INODETABLE_H
