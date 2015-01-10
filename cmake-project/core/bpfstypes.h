@@ -13,6 +13,7 @@ typedef uint16_t InodeSize;
 typedef uint32_t InodeCount;
 typedef uint32_t InodeId;
 typedef uint16_t RawPermissions;
+typedef char * BytePointer;
 
 const BlockId INVALID_BLOCK_ID = 0;
 

@@ -11,6 +11,7 @@ File::File(std::string name, Inode *inode, FSPartition *fsPartition)
     this->inode = inode;
     this->fsPartition = fsPartition;
     this->fileReadBuffer = nullptr;
+    this->fileWriteBuffer = nullptr;
     this->blockIdCache = nullptr;
 }
 
@@ -27,6 +28,8 @@ File::~File()
 {
     if (fileReadBuffer != nullptr)
         delete fileReadBuffer;
+    if (fileWriteBuffer != nullptr)
+        delete fileWriteBuffer;
     if (blockIdCache != nullptr)
         delete blockIdCache;
 }
@@ -167,6 +170,13 @@ void File::write(std::ifstream &fileStream)
         appendByBlock(buffer, fileStream.gcount());
 }
 
+uint64_t File::rewrite(const char *buffer, uint64_t length, uint64_t offset)
+{
+    if (fileWriteBuffer == nullptr)
+        fileWriteBuffer = new FileWriteBuffer(this, fsPartition->getBlockSize());
+    return fileWriteBuffer->write(buffer, length, offset);
+}
+
 uint64_t File::write(const char *buffer, uint64_t length, uint64_t offset)
 {
     Log::stream << "File size: " << getTotalSizeInBytes() << " requested offset: " << offset << std::endl;
@@ -175,7 +185,7 @@ uint64_t File::write(const char *buffer, uint64_t length, uint64_t offset)
 
         return length;
     }
-    throw NotImplementedYetException();
+    return rewrite(buffer, length, offset);
 }
 
 void File::get(std::ofstream &fileStream)
@@ -265,61 +275,89 @@ bool File::isDirectory()
     return false;
 }
 
-FileReadBuffer::FileReadBuffer(File *file, BlockSize blockSize)
+FileBuffer::FileBuffer(File *file, BlockSize blockSize)
 {
-    Log::stream << "FileReadBuffer constructor" << std::endl;
+//    Log::stream << "FileBuffer constructor" << std::endl;
     this->file = file;
     this->blockSize = blockSize;
     this->innerBuffer = new char[blockSize];
     this->nextBlock = 0;
+//    this->currentBlock = INVALID_POSITION;
     this->currentPositionInBuffer = 0;
     loadNextBlock();
 }
 
-FileReadBuffer::~FileReadBuffer()
+FileBuffer::~FileBuffer()
 {
-    Log::stream << "FileReadBuffer destructor" << std::endl;
+//    Log::stream << "FileBuffer destructor" << std::endl;
     delete [] innerBuffer;
+}
+
+void FileReadBuffer::onByteRecieved(BytePointer bytePtr, const char *positionInBuffer)
+{
+    *const_cast<char*>(positionInBuffer) = *bytePtr;
 }
 
 uint64_t FileReadBuffer::read(char *buffer, uint64_t length)
 {
-    unsigned i;
-    for (i = 0; i < length; ++i) {
-        int byte = nextByte();
-        if (byte != END_OF_FILE)
-            buffer[i] = byte;
-        else
-            break;
-    }
-    return i;
+    return iterateStream(buffer, length);
 }
 
 uint64_t FileReadBuffer::read(char *buffer, uint64_t length, uint64_t offset)
 {
-    loadBlock(offset / blockSize);
-    currentPositionInBuffer = offset % blockSize;
-    return read(buffer, length);
+    return iterateStream(buffer, length, offset);
 }
 
-int FileReadBuffer::nextByte()
+BytePointer FileBuffer::nextByte()
 {
     if (currentPositionInBuffer >= currentBlockSize)
         loadNextBlock();
     if (currentPositionInBuffer == END_OF_FILE)
-        return END_OF_FILE;
-    return innerBuffer[currentPositionInBuffer++];
+        return nullptr;
+    return innerBuffer + currentPositionInBuffer++;
 }
 
-void FileReadBuffer::loadBlock(BlockCount blockId) {
+void FileBuffer::loadBlock(BlockCount blockId) {
     nextBlock = blockId;
     loadNextBlock();
 }
 
-void FileReadBuffer::loadNextBlock() {
+uint64_t FileBuffer::iterateStream(const char *buffer, uint64_t length)
+{
+    unsigned i;
+    for (i = 0; i < length; ++i) {
+        BytePointer bytePtr = nextByte();
+        if (bytePtr != nullptr)
+            onByteRecieved(bytePtr, buffer + i);
+        else
+            break;
+    }
+//    onBlockManipulationCompleted(innerBuffer, currentBlock);
+    return i;
+}
+
+uint64_t FileBuffer::iterateStream(const char *buffer, uint64_t length, uint64_t offset)
+{
+    BlockCount block = offset / blockSize;
+    loadBlock(block);
+    currentPositionInBuffer = offset % blockSize;
+    return iterateStream(buffer, length);
+}
+
+File *FileBuffer::getFile()
+{
+    return file;
+}
+
+void FileBuffer::loadNextBlock() {
     try {
-        currentBlockSize = file->readBlock(nextBlock++, innerBuffer);
-        currentPositionInBuffer = 0;
+//        if (currentBlock != nextBlock) {
+//            if (currentBlock != FileBuffer::INVALID_POSITION)
+//                onBlockManipulationCompleted(innerBuffer, currentBlock);
+//            currentBlock = nextBlock;
+            currentBlockSize = file->readBlock(nextBlock++, innerBuffer);
+            currentPositionInBuffer = 0;
+//        }
     }
     catch (BlockIndexOutOfRangeException e) {
         currentPositionInBuffer = END_OF_FILE;
@@ -416,4 +454,25 @@ IIndirectBlock *BlockIdCache::getIndirectBlock(unsigned index)
     if (!isCached(index))
         cacheBlocksTo(index);
     return cache.at(index);
+}
+
+
+void FileWriteBuffer::onByteRecieved(BytePointer bytePtr, const char *positionInBuffer)
+{
+    *bytePtr = *positionInBuffer;
+}
+
+void FileWriteBuffer::onBlockManipulationCompleted(char *innerBuffer, BlockCount blockSequenceNumber)
+{
+    getFile()->writeBlock(blockSequenceNumber, innerBuffer);
+}
+
+uint64_t FileWriteBuffer::write(char *buffer, uint64_t length)
+{
+    return iterateStream(buffer, length);
+}
+
+uint64_t FileWriteBuffer::write(const char *buffer, uint64_t length, uint64_t offset)
+{
+    return iterateStream(buffer, length, offset);
 }
