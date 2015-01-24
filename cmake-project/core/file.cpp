@@ -252,7 +252,7 @@ void File::cutToSize(uint64_t requestedSize)
     if (currentSize < requestedSize)
         throw FileCutException();
     uint64_t bytesToCut = currentSize - requestedSize;
-    bytesToCut = cutFromLastBlock(requestedSize);
+    bytesToCut = cutFromLastBlock(bytesToCut);
     while (bytesToCut > fsPartition->getBlockSize())
         bytesToCut -= cutByBlock();
     cutFromLastBlock(bytesToCut);
