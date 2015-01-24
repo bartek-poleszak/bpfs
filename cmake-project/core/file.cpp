@@ -232,27 +232,28 @@ void File::appendWithZeroes(uint64_t size)
 
 BlockSize File::cutByBlock()
 {
-    throw NotImplementedYetException();
     BlockSize result = inode->getLastBlockByteCount();
+    BlockId lastBlock = blockIdCache->getBlockId(inode->getSizeInBlocks() - 1);
+    inode->setSizeInBlocks(inode->getSizeInBlocks() - 1);
+    fsPartition->markBlockAsFree(lastBlock);
     return result;
 }
 
 uint64_t File::cutFromLastBlock(uint64_t bytesToCut) {
     if (bytesToCut < inode->getLastBlockByteCount()) {
         inode->setLastBlockByteCount(inode->getLastBlockByteCount() - bytesToCut);
-        return 0;
+        return bytesToCut;
     }
-    bytesToCut -= cutByBlock();
-    return bytesToCut;
+    return cutByBlock();
 }
 
 void File::cutToSize(uint64_t requestedSize)
 {
     auto currentSize = getTotalSizeInBytes();
+    uint64_t bytesToCut = currentSize - requestedSize;
     if (currentSize < requestedSize)
         throw FileCutException();
-    uint64_t bytesToCut = currentSize - requestedSize;
-    bytesToCut = cutFromLastBlock(bytesToCut);
+    bytesToCut -= cutFromLastBlock(bytesToCut);
     while (bytesToCut > fsPartition->getBlockSize())
         bytesToCut -= cutByBlock();
     cutFromLastBlock(bytesToCut);
@@ -260,6 +261,7 @@ void File::cutToSize(uint64_t requestedSize)
 
 void File::truncate(uint64_t size)
 {
+    initializeBlockIdCacheIfNeeded();
     auto currentSize = getTotalSizeInBytes();
     if (size > currentSize)
         appendWithZeroes(size);
