@@ -240,6 +240,10 @@ BlockSize File::cutByBlock()
     BlockId lastBlock = blockIdCache->getBlockId(inode->getSizeInBlocks() - 1);
     inode->setSizeInBlocks(inode->getSizeInBlocks() - 1);
     fsPartition->markBlockAsFree(lastBlock);
+    if (inode->getSizeInBlocks() > 0)
+        inode->setLastBlockByteCount(fsPartition->getBlockSize());
+    else
+        inode->setLastBlockByteCount(0);
     return result;
 }
 
@@ -248,6 +252,8 @@ uint64_t File::cutFromLastBlock(uint64_t bytesToCut) {
         inode->setLastBlockByteCount(inode->getLastBlockByteCount() - bytesToCut);
         return bytesToCut;
     }
+    else if (bytesToCut == 0)
+        return 0;
     return cutByBlock();
 }
 
@@ -268,7 +274,7 @@ void File::truncate(uint64_t size)
     initializeBlockIdCacheIfNeeded();
     auto currentSize = getTotalSizeInBytes();
     if (size > currentSize)
-        appendWithZeroes(size);
+        appendWithZeroes(size - currentSize);
     else if (size == currentSize)
         return;
     else

@@ -42,6 +42,8 @@ public:
     void readEntryFromBuffer(uint8_t entryLength, File *file, char buffer);
     void readEntryFromBuffer(char *buffer, uint8_t stringLength);
     File *getAsFile();
+    void appendFileByEntry(char *buffer);
+    void appendFileByEntry(char *buffer, string &fileName);
 };
 
 #endif // DIRECTORY_H

@@ -45,7 +45,7 @@ int getattr (const char *path, struct stat *buffer) {
         catch (FileDosentExistException e) {
             return -ENOENT;
         }
-        buffer->st_mode = S_IFREG | 0644;
+        buffer->st_mode = S_IFREG | 0600;
         buffer->st_nlink = 1;
     }
 
@@ -117,6 +117,12 @@ int open (const char *path, struct fuse_file_info *fileInfo)
 {
 //    if ((fileInfo->flags & 3) != O_RDONLY)
 //        return -EACCES;
+    try {
+        File *file = getFileFromPath(path);
+    }
+    catch (FileDosentExistException e) {
+        return -ENOENT;
+    }
     return 0;
 }
 

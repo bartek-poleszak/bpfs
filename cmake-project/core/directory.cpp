@@ -46,9 +46,21 @@ Directory::~Directory()
 {
 }
 
+void Directory::appendFileByEntry(char *buffer, string &fileName)
+{
+    unsigned entrySize = createRawEntry(buffer, fileName);
+    file->append(buffer, entrySize);
+}
+
 void Directory::flush()
 {
-    Log::stream << "Directory flush not implemented" << std::endl;
+    char buffer[MAX_FILE_NAME_LENGTH];
+    file->truncate(0);
+    for (auto &entry : entries) {
+        string fileName = entry.first;
+        if (fileExists(fileName))
+            appendFileByEntry(buffer, fileName);
+    }
 }
 
 Inode *Directory::getInode(const string &fileName) {
@@ -65,8 +77,7 @@ void Directory::link(string &fileName, Inode *inode)
     char buffer[MAX_FILE_NAME_LENGTH];
     entries[fileName] = inode->getId();
     inode->addLink();
-    unsigned entrySize = createRawEntry(buffer, fileName);
-    file->append(buffer, entrySize);
+    appendFileByEntry(buffer, fileName);
 }
 
 void Directory::link(File &file)
