@@ -56,10 +56,14 @@ void File::initializeBlockIdCacheIfNeeded()
 
 void File::unlink()
 {
-    assert(inode->getHardLinkCount() != 0);
-    inode->removeLink();
-    if (inode->getHardLinkCount() == 0)
-        markBlocksAsFree();
+//    assert(inode->getHardLinkCount() != 0);
+    if (inode->getHardLinkCount() > 0) {
+        inode->removeLink();
+        if (inode->getHardLinkCount() == 0)
+            markBlocksAsFree();
+    }
+    else
+        Log::stream << "Cannot unlink - hard link count is already 0" << std::endl;
 }
 
 void File::markBlocksAsFree()
@@ -265,6 +269,8 @@ void File::truncate(uint64_t size)
     auto currentSize = getTotalSizeInBytes();
     if (size > currentSize)
         appendWithZeroes(size);
+    else if (size == currentSize)
+        return;
     else
         cutToSize(size);
 }
@@ -476,5 +482,6 @@ uint64_t FileWriteBuffer::write(char *buffer, uint64_t length)
 
 uint64_t FileWriteBuffer::write(const char *buffer, uint64_t length, uint64_t offset)
 {
+//    assert(offset == getFile()->getTotalSizeInBytes());
     return iterateStream(buffer, length, offset);
 }
