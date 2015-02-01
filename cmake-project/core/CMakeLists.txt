@@ -21,6 +21,8 @@ set(SRC_LIST
     iindirectblock.cpp
     diskmatrix.cpp
     listfreeblockmanager.cpp
+    encryptor.cpp
+    xorencryptor.cpp
 )
 
 add_definitions(

@@ -9,6 +9,7 @@
 #include "filedisk.h"
 #include "utils.h"
 #include "diskmatrix.h"
+#include "xorencryptor.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ FSPartition *partition;
 Directory *rootDirectory;
 ostream &logStream = cout;
 string devicePath;
+XorEncryptor encryptor;
 
 File *getFileFromPath(const char *path)
 {
@@ -119,6 +121,7 @@ int open (const char *path, struct fuse_file_info *fileInfo)
 //        return -EACCES;
     try {
         File *file = getFileFromPath(path);
+        (void) file;
     }
     catch (FileDosentExistException e) {
         return -ENOENT;
@@ -241,7 +244,7 @@ void initializeMatrix(int deviceCount, char *devicePaths[]) {
     vector<string> paths;
     for(int i = 0; i < deviceCount; i++)
         paths.push_back(string(devicePaths[i]));
-    bpfs::disk = new DiskMatrix(paths, 1024);
+    bpfs::disk = new DiskMatrix(paths, 1024, bpfs::encryptor);
 }
 
 void initializeFileDisk(char *path) {

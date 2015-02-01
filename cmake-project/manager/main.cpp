@@ -3,6 +3,7 @@
 #include <exception>
 #include "main.h"
 #include "diskmatrix.h"
+#include "xorencryptor.h"
 
 class TooFewArgumentsException : public std::exception {};
 
@@ -106,7 +107,8 @@ void ConsoleInterface::makeMatrix(const char *diskPath)
             cin >> path;
             paths.push_back(path);
         }
-        DiskMatrix diskMatrix(paths, 1024);
+        XorEncryptor encryptor;
+        DiskMatrix diskMatrix(paths, 1024, encryptor, true);
         commandResolver.makeFilesystem(diskMatrix);
     }
 }

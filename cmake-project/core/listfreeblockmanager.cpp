@@ -5,12 +5,22 @@
 #include "log.h"
 #include "rawdatautils.h"
 
+#include <chrono>
+#include <thread>
 
-ListFreeBlockManager::ListFreeBlockManager(FSPartition *partition)
+
+ListFreeBlockManager::ListFreeBlockManager(FSPartition *partition, bool creatingFs)
     : controlBlock(partition)
 {
     this->partition = partition;
-    reloadCurrentIndirectBlock();
+    if (!creatingFs)
+        reloadCurrentIndirectBlock();
+}
+
+ListFreeBlockManager::ListFreeBlockManager(FSPartition *partition)
+    : ListFreeBlockManager(partition, false)
+{
+
 }
 
 void ListFreeBlockManager::reloadCurrentIndirectBlock()
@@ -127,6 +137,7 @@ void ListFreeBlockManager::createList(BlockId inclusiveFrom)
 
         indirectBlock.setNextIndirectBlockId(firstIndirectBlock + i + 1);
         blocksToStore -= indirectBlock.getMaxSize() - initialPosition;
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     assert(inclusiveFrom == partition->getHeader()->getBlockCount());
     assert(blocksToStore == 0);

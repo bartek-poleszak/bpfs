@@ -20,6 +20,7 @@ private:
 public:
     static const int INODE_TABLE_BLOCK = 1;
 
+    FSPartition(IDisk &disk, bool creatingFs);
     FSPartition(IDisk &disk);
     ~FSPartition();
     PartitionHeader *getHeader() const;

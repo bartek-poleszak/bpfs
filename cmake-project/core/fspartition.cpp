@@ -3,13 +3,19 @@
 #include "log.h"
 #include "listfreeblockmanager.h"
 
-FSPartition::FSPartition(IDisk &disk)
+FSPartition::FSPartition(IDisk &disk, bool creatingFs)
     : disk(disk)
 {
     this->header = new PartitionHeader(disk);
     this->inodeTable = new InodeTable(disk, header);
 //    this->freeBlockManager = new SimpleFreeBlockManager(this);
-    this->freeBlockManager = new ListFreeBlockManager(this);
+    this->freeBlockManager = new ListFreeBlockManager(this, creatingFs);
+}
+
+FSPartition::FSPartition(IDisk &disk)
+    : FSPartition(disk, false)
+{
+
 }
 
 FSPartition::~FSPartition()

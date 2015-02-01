@@ -31,6 +31,7 @@ private:
     void initializeNewListBlock(BlockId id);
     void addToCurrentListBlock(BlockId id);
 public:
+    ListFreeBlockManager(FSPartition *partition, bool creatingFs);
     ListFreeBlockManager(FSPartition *partition);
     ~ListFreeBlockManager() override;
     BlockId getFreeBlock() override;
