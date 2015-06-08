@@ -107,9 +107,7 @@ void ConsoleInterface::makeMatrix(const char *diskPath)
             cin >> path;
             paths.push_back(path);
         }
-        XorEncryptor encryptor;
-        DiskMatrix diskMatrix(paths, 1024, encryptor, true);
-        commandResolver.makeFilesystem(diskMatrix);
+        commandResolver.makeFilesystem(paths);
     }
 }
 
@@ -125,8 +123,7 @@ void ConsoleInterface::main(const char *diskPath)
             break;
 
         if (command == Command::MAKE_FILESYSTEM) {
-            FileDisk disk(diskPath, 1024);
-            commandResolver.makeFilesystem(disk);
+            commandResolver.makeFilesystem(diskPath);
         }
         else if (command == Command::MAKE_MATRIX) {
             makeMatrix(diskPath);

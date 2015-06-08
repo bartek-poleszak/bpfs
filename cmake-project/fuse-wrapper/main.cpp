@@ -187,8 +187,6 @@ int fsyncdir (const char *path, int datasync, struct fuse_file_info *fileInfo) {
 
 void *init (struct fuse_conn_info *conn)
 {
-    partition = new FSPartition(*disk);
-    rootDirectory = Directory::rootOf(partition);
     return nullptr;
 }
 
@@ -240,27 +238,40 @@ void validateDeviceName(char *argv[]) {
         showUsageNote(argv[0]);
 }
 
-void initializeMatrix(int deviceCount, char *devicePaths[]) {
+void initializeMatrix(int deviceCount, char *devicePaths[], BlockSize blockSize) {
     vector<string> paths;
     for(int i = 0; i < deviceCount; i++)
         paths.push_back(string(devicePaths[i]));
-    bpfs::disk = new DiskMatrix(paths, 1024, bpfs::encryptor);
+    bpfs::disk = new DiskMatrix(paths, blockSize, bpfs::encryptor);
 }
 
-void initializeFileDisk(char *path) {
-    bpfs::disk = new FileDisk(path, 1024);
+void initializeFileDisk(char *path, BlockSize blockSize) {
+    bpfs::disk = new FileDisk(path, blockSize);
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 3)
         showUsageNote(argv[0]);
     if (strcmp("matrix", argv[1]) == 0)
-        initializeMatrix(argc - 3, argv + 2);
+        initializeMatrix(argc - 3, argv + 2, 1024);
     else {
         validateDeviceName(argv);
-        initializeFileDisk(argv[1]);
+        initializeFileDisk(argv[1], 1024);
     }
     bpfs::devicePath = argv[1];
+
+    bpfs::partition = new FSPartition(*bpfs::disk);
+    BlockSize blockSize = bpfs::partition->getBlockSize();
+    delete bpfs::partition;
+    delete bpfs::disk;
+    if (strcmp("matrix", argv[1]) == 0)
+        initializeMatrix(argc - 3, argv + 2, blockSize);
+    else {
+        validateDeviceName(argv);
+        initializeFileDisk(argv[1], blockSize);
+    }
+    bpfs::partition = new FSPartition(*bpfs::disk);
+    bpfs::rootDirectory = Directory::rootOf(bpfs::partition);
 
     char debugFlag[3] = "-d";
     char singleThreadFlag[3] = "-s";
