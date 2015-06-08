@@ -1,2 +1,0 @@
-add_executable(blkDeviceServer main.c)
-target_link_libraries(blkDeviceServer LINK_PUBLIC FileAccess)
