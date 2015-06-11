@@ -1,0 +1,5 @@
+Do zbudowania projektu wymagana jest biblioteka FUSE, a także narzędzia CMake oraz make.
+Aby zbudować projekt wykonaj:
+
+$ cmake .
+$ make
